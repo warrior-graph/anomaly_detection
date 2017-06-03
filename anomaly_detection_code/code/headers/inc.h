@@ -26,9 +26,8 @@ using namespace std;
 #include <ctime>
 #include <vector>
 #include <armadillo>
-#include <opencv2/opencv.hpp>
 using namespace arma;
-
+#include <opencv2/opencv.hpp>
 
 
 

@@ -21,11 +21,11 @@
 // (see http://www.opensource.org/licenses for more info)
 
 
-#include"../headers/inc.h"
-#include"../headers/main.h"
+#include "../headers/inc.h"
+#include "../headers/main.h"
 
 
-#include"../headers/AnomalyDetection.h"
+#include "../headers/AnomalyDetection.h"
 #include "../headers/ParameterInfo.h"
 
 #define  READ_MASKS
@@ -36,10 +36,10 @@ void numtostr(int num, char *str);
 
 //void Img_mask_concatenate(const cv::Mat &frame, const cv::Mat &bin_img, cv::Mat &out_concatenate_img);
 //void compute_cube_mean_std(const field<cube> &global_training_dist);
-void ad_post_processing(Mat<u32> &resmtx, cube &ad_flags, const double &twindow, const u32 &seqno);
+void ad_post_processing(Mat<uword> &resmtx, cube &ad_flags, const double &twindow, const uword &seqno);
 void load_configurations(mat &param_vec);
 cv::Mat
-filtered_detection(vector<cv::Mat> &display_buffer, AnomalyDetection &obj, const cube & ad_flags, const u32 &f);
+filtered_detection(vector<cv::Mat> &display_buffer, AnomalyDetection &obj, const cube & ad_flags, const uword &f);
 
 string outpath = "output/ad_masks/ped1/";
 
@@ -66,13 +66,13 @@ int main(int argc, char **argv)
 	//Setting number of sequences & parameters of the algorithm
 	load_configurations(param_vec);
 
-	u32 img_width, img_height;
+	uword img_width, img_height;
 	mat localisation_res;
 	string mask_save_path;
 	bool ad_training_required = true;
 	bool first_time_entry = true;
 
-	for (u32 loop_id = 0; loop_id < param_vec.n_rows; ++loop_id)
+	for (uword loop_id = 0; loop_id < param_vec.n_rows; ++loop_id)
 	{
 
 //		avg_results.open("output/ad_localisation_gist_results.txt", ios::out | ios::app);
@@ -93,7 +93,7 @@ int main(int argc, char **argv)
 				img_width = 240;
 
 
-			u32 mbx, mby;
+			uword mbx, mby;
 
 			img_width = ((img_width + cur_param_vec(1) - 1) * cur_param_vec(1)) / cur_param_vec(1);
 			img_height = ((img_height + cur_param_vec(1) - 1) * cur_param_vec(1)) / cur_param_vec(1);
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 
 		//read total sequences
 		const u16 total_seqs = cur_param_vec(0);
-		Mat<u32> res_mtx;
+		Mat<uword> res_mtx;
 
 
 		string tst_img_path, tr_img_path, seqname, tr_masks_list, tr_imgs_list;
@@ -198,7 +198,7 @@ int main(int argc, char **argv)
 			if (ad_training_required == true)
 			{
 
-				for (u32 i = 0; i < file_sys1.sequence_len; i++)
+				for (uword i = 0; i < file_sys1.sequence_len; i++)
 				{
 					//read frame into 'input_mtx' and then store into 'padded_input_img'
 					file_sys1.get_input_frame(tr_mask_filenames, i);
@@ -234,9 +234,9 @@ int main(int argc, char **argv)
 			// downsize 'first_img' depending in DS_RATIO and pad to make it multiple of 'N'
 			file_sys2.downscale_frame_and_pad_if_necessary();
 
-			u32 millsec;
+			uword millsec;
 			//loop the test images to detect anomaly in the frames
-			for (u32 f = 0; f < file_sys1.sequence_len; f++)
+			for (uword f = 0; f < file_sys1.sequence_len; f++)
 			{
 
 				file_sys1.get_input_frame(tst_imgs_filenames, f);
@@ -255,7 +255,7 @@ int main(int argc, char **argv)
 #endif
 				display_buffer.push_back(file_sys2.padded_input_img);
 
-				for (u32 i = 0; i < ad_object.loc.size(); i++)
+				for (uword i = 0; i < ad_object.loc.size(); i++)
 				{
 
 					ad_flags(ad_object.loc[i].coords.y, ad_object.loc[i].coords.x, f) = 1;
@@ -374,7 +374,7 @@ void numtostr(int num, char *str)
 cv::Mat compute_ad_mask(const AnomalyDetection &obj, const rowvec& in_params)
 {
 
-	u32 width, height;
+	uword width, height;
 
 	if (in_params(10) == 0)
 	{
@@ -395,17 +395,17 @@ cv::Mat compute_ad_mask(const AnomalyDetection &obj, const rowvec& in_params)
 
 	cv::Size imsize(width, height);
 	cv::Mat ad_mask = cv::Mat::zeros(imsize, CV_8UC1);
-	u32 ovlstep = (u32) in_params(2);
-	u32 x_cord, y_cord;
-	for (u32 i = 0; i < obj.loc.size(); i++)
+	uword ovlstep = (uword) in_params(2);
+	uword x_cord, y_cord;
+	for (uword i = 0; i < obj.loc.size(); i++)
 	{
 		x_cord = obj.loc[i].coords.x * ovlstep;
 		y_cord = obj.loc[i].coords.y * ovlstep;
 
-		for (u32 x = x_cord; x < (x_cord + ovlstep); ++x)
+		for (uword x = x_cord; x < (x_cord + ovlstep); ++x)
 		{
 
-			for (u32 y = y_cord; y < (y_cord + ovlstep); ++y)
+			for (uword y = y_cord; y < (y_cord + ovlstep); ++y)
 			{
 
 				ad_mask.at<arma::u8> (y, x) = 255;
@@ -414,7 +414,7 @@ cv::Mat compute_ad_mask(const AnomalyDetection &obj, const rowvec& in_params)
 
 	}
 
-	u32 true_width, true_height;
+	uword true_width, true_height;
 	if (in_params(10) == 0)
 	{
 		true_width = 238;
@@ -433,12 +433,12 @@ cv::Mat compute_ad_mask(const AnomalyDetection &obj, const rowvec& in_params)
 }
 
 
-void ad_post_processing(Mat<u32> &resmtx, cube &ad_flags, const double &twindow, const u32 &seqno)
+void ad_post_processing(Mat<uword> &resmtx, cube &ad_flags, const double &twindow, const uword &seqno)
 {
 
-	u32 filter_size = 3;
-	u32 T = 2;
-	u32 ofset = (filter_size / 2);
+	uword filter_size = 3;
+	uword T = 2;
+	uword ofset = (filter_size / 2);
 	ofstream filt_file;
 	filt_file.open("../../wrk_space_output1/filt_gt.txt", ios::out);
 
@@ -447,11 +447,11 @@ void ad_post_processing(Mat<u32> &resmtx, cube &ad_flags, const double &twindow,
 	cube ad_flags_raw;
 	ad_flags_raw = ad_flags;
 
-	for (u32 t = ofset; t < ad_flags.n_slices - ofset; ++t)
+	for (uword t = ofset; t < ad_flags.n_slices - ofset; ++t)
 	{
-		for (u32 y = ofset; y < ad_flags.n_rows - ofset; ++y)
+		for (uword y = ofset; y < ad_flags.n_rows - ofset; ++y)
 		{
-			for (u32 x = ofset; x < ad_flags.n_cols - ofset; ++x)
+			for (uword x = ofset; x < ad_flags.n_cols - ofset; ++x)
 			{
 
 				if (ad_flags_raw(y, x, t) > 0)
@@ -468,8 +468,8 @@ void ad_post_processing(Mat<u32> &resmtx, cube &ad_flags, const double &twindow,
 		}
 	}
 
-	u32 n_seq = resmtx.n_rows;
-	Col<u32> n_frms(n_seq);
+	uword n_seq = resmtx.n_rows;
+	Col<uword> n_frms(n_seq);
 
 	cout << n_seq << endl;
 
@@ -489,9 +489,9 @@ void ad_post_processing(Mat<u32> &resmtx, cube &ad_flags, const double &twindow,
 		exit(0);
 	}
 
-	ofset = (u32) (twindow / 2);
+	ofset = (uword) (twindow / 2);
 
-	for (u32 i = twindow; i < n_frms(seqno); ++i)
+	for (uword i = twindow; i < n_frms(seqno); ++i)
 	{
 		// result affecting the centre frame of the temporal window
 
@@ -506,7 +506,7 @@ void ad_post_processing(Mat<u32> &resmtx, cube &ad_flags, const double &twindow,
 	ad_flags_tmp = ad_flags;
 	ad_flags.zeros();
 
-	for (u32 t = twindow; t < ad_flags.n_slices; ++t)
+	for (uword t = twindow; t < ad_flags.n_slices; ++t)
 	{
 		ad_flags.slice(t - ofset) = ad_flags_tmp.slice(t);
 	}
@@ -520,8 +520,8 @@ void ad_post_processing(Mat<u32> &resmtx, cube &ad_flags, const double &twindow,
 void load_configurations(mat &param_vec)
 {
 
-	Col<u32> prms_srt, prms_end, prms_stp;
-	u32 dataset_id = 0;
+	Col<uword> prms_srt, prms_end, prms_stp;
+	uword dataset_id = 0;
 
 
 		prms_srt << 16 << 16 << 3 << 40 << 81   << 90 << 6 << 16 << 10;
@@ -536,13 +536,13 @@ void load_configurations(mat &param_vec)
 		exit(-1);
 	}
 
-	u32 size = prms_srt.n_elem;
+	uword size = prms_srt.n_elem;
 	float total = 1, tmp;
 
-	for (u32 i = 0; i < size; ++i)
+	for (uword i = 0; i < size; ++i)
 	{
 
-		tmp = (u32) (prms_end(i) - prms_srt(i) + prms_stp(i)) / (prms_stp(i));
+		tmp = (uword) (prms_end(i) - prms_srt(i) + prms_stp(i)) / (prms_stp(i));
 
 		cout << tmp << endl;
 		if (tmp < 0)
@@ -554,33 +554,33 @@ void load_configurations(mat &param_vec)
 
 	}
 
-	param_vec.set_size((u32) total, size + 2);
+	param_vec.set_size((uword) total, size + 2);
 	param_vec.zeros();
 
 	// set the number of sequences to be tested here.
 	param_vec.col(0).fill(1);
 	param_vec.col(param_vec.n_cols - 1).fill(dataset_id);
 
-	u32 cnt = 0;
-	for (u32 i0 = prms_srt(0); i0 <= prms_end(0); i0 += prms_stp(0))
+	uword cnt = 0;
+	for (uword i0 = prms_srt(0); i0 <= prms_end(0); i0 += prms_stp(0))
 	{
-		for (u32 i1 = prms_srt(1); i1 <= prms_end(1); i1 += prms_stp(1))
+		for (uword i1 = prms_srt(1); i1 <= prms_end(1); i1 += prms_stp(1))
 		{
-			for (u32 i2 = prms_srt(2); i2 <= prms_end(2); i2 += prms_stp(2))
+			for (uword i2 = prms_srt(2); i2 <= prms_end(2); i2 += prms_stp(2))
 			{
-				for (u32 i3 = prms_srt(3); i3 <= prms_end(3); i3 += prms_stp(3))
+				for (uword i3 = prms_srt(3); i3 <= prms_end(3); i3 += prms_stp(3))
 				{
-					for (u32 i4 = prms_srt(4); i4 <= prms_end(4); i4 += prms_stp(4))
+					for (uword i4 = prms_srt(4); i4 <= prms_end(4); i4 += prms_stp(4))
 					{
-						for (u32 i5 = prms_srt(5); i5 <= prms_end(5); i5 += prms_stp(5))
+						for (uword i5 = prms_srt(5); i5 <= prms_end(5); i5 += prms_stp(5))
 						{
 
-							for (u32 i6 = prms_srt(6); i6 <= prms_end(6); i6 += prms_stp(6))
+							for (uword i6 = prms_srt(6); i6 <= prms_end(6); i6 += prms_stp(6))
 							{
-								for (u32 i7 = prms_srt(7); i7 <= prms_end(7); i7 += prms_stp(7))
+								for (uword i7 = prms_srt(7); i7 <= prms_end(7); i7 += prms_stp(7))
 								{
 
-									for (u32 i8 = prms_srt(8); i8 <= prms_end(8); i8 += prms_stp(8))
+									for (uword i8 = prms_srt(8); i8 <= prms_end(8); i8 += prms_stp(8))
 									{
 										param_vec(cnt, 1) = i0;
 										param_vec(cnt, 2) = i1;
@@ -611,23 +611,23 @@ void load_configurations(mat &param_vec)
 
 }
 //
-cv::Mat filtered_detection(vector<cv::Mat> &display_buffer, AnomalyDetection &obj, const cube & ad_flags, const u32 &f)
+cv::Mat filtered_detection(vector<cv::Mat> &display_buffer, AnomalyDetection &obj, const cube & ad_flags, const uword &f)
 {
 
 	vector<cv::Mat>::iterator p = display_buffer.begin();
 	ofstream filt_file;
 	filt_file.open("../../wrk_space_output1/filt_disp.txt", ios::app);
 
-	u32 filter_size = 3;
-	u32 T = 2;
-	u32 ofset = (filter_size / 2);
+	uword filter_size = 3;
+	uword T = 2;
+	uword ofset = (filter_size / 2);
 
 	cube ad_flags_raw;
 	ad_flags_raw = ad_flags;
 
-	for (u32 y = ofset; y < ad_flags.n_rows - ofset; ++y)
+	for (uword y = ofset; y < ad_flags.n_rows - ofset; ++y)
 	{
-		for (u32 x = ofset; x < ad_flags.n_cols - ofset; ++x)
+		for (uword x = ofset; x < ad_flags.n_cols - ofset; ++x)
 		{
 
 			if (ad_flags_raw(y, x, (f - ofset)) > 0)
@@ -658,9 +658,9 @@ cv::Mat filtered_detection(vector<cv::Mat> &display_buffer, AnomalyDetection &ob
 	img_arr.clear();
 
 
-	for (u32 y = ofset; y < ad_flags.n_rows - ofset; ++y)
+	for (uword y = ofset; y < ad_flags.n_rows - ofset; ++y)
 	{
-		for (u32 x = ofset; x < ad_flags.n_cols - ofset; ++x)
+		for (uword x = ofset; x < ad_flags.n_cols - ofset; ++x)
 		{
 
 			if (ad_flags_raw(y, x, (f - ofset)) > 0)

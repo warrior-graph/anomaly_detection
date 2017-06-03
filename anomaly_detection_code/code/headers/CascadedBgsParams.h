@@ -25,7 +25,7 @@ typedef struct
 	 double likelihood_ratio_T;
 	 double tmprl_cosinedist_T;
 	 double use_spatial_coherence_based_bg_est;
-	 u32 fv_type;
+	 uword fv_type;
 	 bool one_time_training;
 	 bool training_required;
 } bgscascade_thresholds;
@@ -39,9 +39,9 @@ public:
 	const s16 N;
 	const s16 sub_mat_elem;
 	const s16 ovlstep;
-	const u32 n_gaus;
-	const u32 n_gaus_final;
-	const u32 n_iter;
+	const uword n_gaus;
+	const uword n_gaus_final;
+	const uword n_iter;
 	const double trust;
 	const bool normalise;
 	const bool print_progress;
@@ -52,12 +52,12 @@ public:
 	const double likelihood_ratio_T;
 	const double tmprl_cosinedist_T;
 	const bool use_spatial_coherence_based_bg_est;
-	const u32 fv_type;
+	const uword fv_type;
 	bool one_time_training;
 	bool training_required;
 
-	CascadedBgsParams(const s32 in_len,const s16 in_N,const s16 in_fvno,const s16 in_ovlstep,const u32 n_gaus,
-			const u32 n_gaus_final,const u32 n_iter,
+	CascadedBgsParams(const s32 in_len,const s16 in_N,const s16 in_fvno,const s16 in_ovlstep,const uword n_gaus,
+			const uword n_gaus_final,const uword n_iter,
 			const double trust, const bool normalise,
 			const bool print_progress,  const bgscascade_thresholds  &T_vals);
 

@@ -26,7 +26,7 @@ struct gbr_config
 {
 
 	s32 kernel_size;
-	Col<u32> theta_arr;
+	Col<uword> theta_arr;
 	field<cv::Mat> kernel_mtx;
 	float variance;
 	float lambda;
@@ -37,7 +37,7 @@ struct gbr_config
 struct edgefilt_config
 {
 	s32 kernel_size;
-	u32 n_kernels;
+	uword n_kernels;
 	field<cv::Mat> kernel_mtx;
 };
 
@@ -102,20 +102,20 @@ private:
 	field<vec> cur_edge_hist;
 	mat smoothing_filter;
 
-	vector<Mat<u32> > input_binary_masks;
-	vector<Mat<u32> > test_binary_masks;
+	vector<Mat<uword> > input_binary_masks;
+	vector<Mat<uword> > test_binary_masks;
 
 	Col<double> DCT_coeffs;
 	Mat<double> dct_mtx;
 
 	bool first_frame;
-	u32 height, width;
-	u32 train_frame_cnt, test_frames, test_frame_cnt;
-	u32 temporal_window;
+	uword height, width;
+	uword train_frame_cnt, test_frames, test_frame_cnt;
+	uword temporal_window;
 	step_val curr_run;
-	u32 N, ovlstep;
-	u32 xmb, ymb, no_of_blks;
-	u32 testfrm_idx, total_blks;
+	uword N, ovlstep;
+	uword xmb, ymb, no_of_blks;
+	uword testfrm_idx, total_blks;
 	cv::Mat estimated_ad_frame;
 
 	uvec sorted_gaussians;
@@ -145,7 +145,7 @@ private:
 	field<mat> tmprl_avgblk_mv;
 
 public:
-	AnomalyDetection(const cv::Mat &frame, const u32 &training_len, const rowvec &cur_params);
+	AnomalyDetection(const cv::Mat &frame, const uword &training_len, const rowvec &cur_params);
 	AnomalyDetection();
 	void collect_frames_for_training(const cv::Mat &frame, const cv::Mat &grysc_frame);
 	void collect_frames_for_testing(const cv::Mat &frame, const cv::Mat &grysc_frame);
@@ -153,13 +153,13 @@ public:
 	void test(const cv::Mat &frame, const cv::Mat &grysc_frame);
 	void
 	compute_subwindows_features(const cv::Mat &in_frame, umat &out_arma_frame);
-	void compute_subwindows_edges(const cv::Mat &in_frame, const cv::Mat &in_bin_frame, const u32 &fidx);
-	void extract_spatio_temporal_features(const u32 &fs_idx, const u32 &stage);
+	void compute_subwindows_edges(const cv::Mat &in_frame, const cv::Mat &in_bin_frame, const uword &fidx);
+	void extract_spatio_temporal_features(const uword &fs_idx, const uword &stage);
 	void trace_block(cv::Mat &frame, const int i, const int j);
 	void create_dct_table(int N);
 	void trace_block_color(cv::Mat &frame, const int i, const int j);
 
-	void display_feature_value(u32 fidx);
+	void display_feature_value(uword fidx);
 	void compute_feature_vector(const Col<double> &input_vector, Col<double> &out_fv);
 
 	void gabor_filter(const cv::Mat &in_frame);
@@ -169,18 +169,18 @@ public:
 	void edge_filter_initialisation();
 
 	void estimate_motion(const cv::Mat &bin_frame, const cv::Mat &grysc_frame, const umat &sub_win_mtx);
-	double find_8connected_neighbours(const u32 &x, const u32 &y, const umat &blk_occ_mtx);
+	double find_8connected_neighbours(const uword &x, const uword &y, const umat &blk_occ_mtx);
 
-	void kernel_density_estimate(const mat & training_samples, vec & pdf, const u32 &idx);
+	void kernel_density_estimate(const mat & training_samples, vec & pdf, const uword &idx);
 	virtual ~AnomalyDetection();
 
 	void save_ad_model_params();
 	void load_ad_model_params();
 	void numtostr(int num, char *str);
 
-	double test_for_speed(const Col<double> &query_vec, const u32 &x, const u32 &y);
+	double test_for_speed(const Col<double> &query_vec, const uword &x, const uword &y);
 
-	double test_for_size(const Col<double> &query_vec, const u32 &x, const u32 &y);
+	double test_for_size(const Col<double> &query_vec, const uword &x, const uword &y);
 
 	double test_for_texture(const mat &model, const Col<double> &query_vec);
 

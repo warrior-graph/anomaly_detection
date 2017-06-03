@@ -1,5 +1,5 @@
 CC = g++
-CXXFLAGS = -std=c++14 -Wall -g -O2
+CXXFLAGS = -Wall -g -O2
 LIBS = -fopenmp -larmadillo `pkg-config --cflags --libs opencv`
 SRCS = main.cpp ParameterInfo.cpp DisplayImage.cpp AnomalyDetection.cpp
 OBJS = main.o ParameterInfo.o DisplayImage.o AnomalyDetection.o

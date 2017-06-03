@@ -16,7 +16,7 @@
 #include "../headers/AnomalyDetection.h"
 
 
-AnomalyDetection::AnomalyDetection(const cv::Mat &frame, const u32 &training_len, const rowvec &cur_params)
+AnomalyDetection::AnomalyDetection(const cv::Mat &frame, const uword &training_len, const rowvec &cur_params)
 {
 	height = frame.rows;
 	width = frame.cols;
@@ -48,7 +48,7 @@ AnomalyDetection::AnomalyDetection(const cv::Mat &frame, const u32 &training_len
 	mv_mtx_y.set_size(height, width);
 
 	training_dist.set_size(2);
-	for (u32 i = 0; i < training_dist.n_elem; ++i)
+	for (uword i = 0; i < training_dist.n_elem; ++i)
 	{
 		training_dist(i).set_size((1 + ymb), (1 + xmb));
 		training_dist(i).zeros();
@@ -80,7 +80,7 @@ AnomalyDetection::AnomalyDetection(const cv::Mat &frame, const u32 &training_len
 
 	Mat<double> bw_vals(1 + ymb, 2);
 	double ofset1, ofset2;
-	u32 n_edge_bins = 4;
+	uword n_edge_bins = 4;
 
 	smoothing_filter.set_size(3, 3);
 
@@ -119,11 +119,11 @@ AnomalyDetection::AnomalyDetection(const cv::Mat &frame, const u32 &training_len
 	sze_kd_eval_pts = linspace<vec> (kd_min[1], kd_max[1], n_kd_eval_pts[1] + 1);
 
 
-	for (u32 y = 0; y < (1 + ymb); ++y)
+	for (uword y = 0; y < (1 + ymb); ++y)
 	{
 
 		//		cout << bw_vals(y, 0) << " " << bw_vals(y, 1) << endl;
-		for (u32 x = 0; x < (1 + xmb); ++x)
+		for (uword x = 0; x < (1 + xmb); ++x)
 		{
 			tmprl_win_feature(y, x).set_size(temporal_window);
 			tmprl_win_feature(y, x).fill(0);
@@ -189,9 +189,9 @@ AnomalyDetection::AnomalyDetection(const cv::Mat &frame, const u32 &training_len
 	gbr_prms.theta_arr.set_size(n_edge_bins);
 	gbr_prms.kernel_mtx.set_size(gbr_prms.theta_arr.n_elem);
 
-	for (u32 i = 0; i < gbr_prms.theta_arr.n_elem; ++i)
+	for (uword i = 0; i < gbr_prms.theta_arr.n_elem; ++i)
 	{
-		gbr_prms.theta_arr(i) = (u32) (180.0 / (gbr_prms.theta_arr.n_elem)) * i;
+		gbr_prms.theta_arr(i) = (uword) (180.0 / (gbr_prms.theta_arr.n_elem)) * i;
 		gbr_prms.kernel_mtx(i) = cv::Mat::zeros(cv::Size(gbr_prms.kernel_size, gbr_prms.kernel_size), CV_32FC1);
 
 	}
@@ -202,7 +202,7 @@ AnomalyDetection::AnomalyDetection(const cv::Mat &frame, const u32 &training_len
 
 	edge_frames.set_size(gbr_prms.theta_arr.n_elem);
 
-	for (u32 i = 0; i < gbr_prms.theta_arr.n_elem; ++i)
+	for (uword i = 0; i < gbr_prms.theta_arr.n_elem; ++i)
 	{
 		edge_frames(i) = cv::Mat::zeros(imsize, CV_32FC1);
 	}
@@ -215,7 +215,7 @@ AnomalyDetection::AnomalyDetection(const cv::Mat &frame, const u32 &training_len
 	edgefilt_prms.kernel_size = 3;
 	edgefilt_prms.kernel_mtx.set_size(edgefilt_prms.n_kernels);
 
-	for (u32 i = 0; i < edgefilt_prms.n_kernels; ++i)
+	for (uword i = 0; i < edgefilt_prms.n_kernels; ++i)
 	{
 		edgefilt_prms.kernel_mtx(i) = cv::Mat::zeros(cv::Size(edgefilt_prms.kernel_size, edgefilt_prms.kernel_size),
 				CV_32FC1);
@@ -254,8 +254,8 @@ void AnomalyDetection::train_model()
 		cout << "temporal window greater than total training frames" << endl;
 		exit(-23);
 	}
-	u32 temporal_win_cnt = train_frame_cnt - temporal_window;
-	u32 mid_pt = (temporal_window) / 2;
+	uword temporal_win_cnt = train_frame_cnt - temporal_window;
+	uword mid_pt = (temporal_window) / 2;
 
 	global_features.set_size(total_blks * temporal_win_cnt);
 
@@ -264,16 +264,16 @@ void AnomalyDetection::train_model()
 
 	//allocation of memory and setting the temporal window sizes
 
-	for (u32 x = 0; x < (1 + xmb); ++x)
+	for (uword x = 0; x < (1 + xmb); ++x)
 	{
-		for (u32 y = 0; y < (1 + ymb); ++y)
+		for (uword y = 0; y < (1 + ymb); ++y)
 		{
 			local_features(y, x).set_size(temporal_win_cnt, 1);
 			blk_occ(y, x).set_size(temporal_win_cnt, 1);
 			tmprl_edge_hist_tr(y, x).set_size(gbr_prms.theta_arr.n_elem, temporal_win_cnt);
 			tmprl_avgblk_mv_tr(y, x).set_size(2, temporal_win_cnt);
 
-			//			for (u32 idx = 0; idx < temporal_win_cnt; ++idx)
+			//			for (uword idx = 0; idx < temporal_win_cnt; ++idx)
 			//			{
 			//				tmprl_edge_hist_tr(y, x)(idx).set_size(
 			//						gbr_prms.theta_arr.n_elem	);
@@ -284,16 +284,16 @@ void AnomalyDetection::train_model()
 
 	cout << "training start" << endl;
 
-	for (u32 f_idx = 0; f_idx < (train_frame_cnt - temporal_window); f_idx++)
+	for (uword f_idx = 0; f_idx < (train_frame_cnt - temporal_window); f_idx++)
 	{
 
-		for (u32 tw_idx = f_idx, z = 0; tw_idx < (f_idx + temporal_window); ++tw_idx, ++z)
+		for (uword tw_idx = f_idx, z = 0; tw_idx < (f_idx + temporal_window); ++tw_idx, ++z)
 		{
 			arma_frame = input_binary_masks[tw_idx];
 
-			for (u32 x = 0; x < (1 + xmb); ++x)
+			for (uword x = 0; x < (1 + xmb); ++x)
 			{
-				for (u32 y = 0; y < (1 + ymb); ++y)
+				for (uword y = 0; y < (1 + ymb); ++y)
 				{
 
 					tmprl_win_feature(y, x)(z) = find_8connected_neighbours(x, y, arma_frame);
@@ -312,9 +312,9 @@ void AnomalyDetection::train_model()
 
 		Col<double> fv(1);
 		// compute DCT of each region over the temporal window
-		for (u32 x = 0; x < (1 + xmb); ++x)
+		for (uword x = 0; x < (1 + xmb); ++x)
 		{
-			for (u32 y = 0; y < (1 + ymb); ++y)
+			for (uword y = 0; y < (1 + ymb); ++y)
 			{
 				compute_feature_vector(tmprl_win_feature(y, x), fv);
 				local_features(y, x).row(f_idx) = trans(fv);
@@ -340,19 +340,19 @@ void AnomalyDetection::train_model()
 	tmp_x.zeros();
 	tmp_y.zeros();
 
-	for (u32 y = 0; y < (1 + ymb); ++y)
+	for (uword y = 0; y < (1 + ymb); ++y)
 	{
-		for (u32 x = 0; x < (1 + xmb); ++x)
+		for (uword x = 0; x < (1 + xmb); ++x)
 		{
 
-			u32 cnt = 0, cnt1 = 0;
+			uword cnt = 0, cnt1 = 0;
 			mat dist(1, 1);
 			mat l1_norm_mv(temporal_win_cnt, 1);
 			mat size_ftr(temporal_win_cnt, 1);
 			l1_norm_mv.zeros();
 			size_ftr.zeros();
 
-			for (u32 t = 0; t < temporal_win_cnt; ++t)
+			for (uword t = 0; t < temporal_win_cnt; ++t)
 			{
 				dist(0, 0) = norm(tmprl_avgblk_mv_tr(y, x).col(t), 1);
 
@@ -399,7 +399,7 @@ void AnomalyDetection::train_model()
 			cnt = 0;
 
 			// for expt and debugging purpose
-			for (u32 z = 0; z < temporal_win_cnt; ++z)
+			for (uword z = 0; z < temporal_win_cnt; ++z)
 			{
 
 				if (accu(blk_occ(y, x).row(z)) > 8)
@@ -412,10 +412,10 @@ void AnomalyDetection::train_model()
 
 			}
 
-			u32 size = max(cnt, u32(2));
+			uword size = max(cnt, uword(2));
 			mat edge_hist_samples(tmprl_edge_hist_tr(y, x).n_rows, size);
 
-			for (u32 z = 0; z < size; ++z)
+			for (uword z = 0; z < size; ++z)
 			{
 				edge_hist_samples.col(z) = valid_edge_hist_samples.col(z);
 			}
@@ -426,7 +426,7 @@ void AnomalyDetection::train_model()
 			edge_hist_samples(0) = valid_edge_hist_samples.col(0);
 			edge_hist_samples(1) = valid_edge_hist_samples.col(0);
 
-			for (u32 z = 0; z < cnt; ++z)
+			for (uword z = 0; z < cnt; ++z)
 			{
 				edge_hist_samples(z) = valid_edge_hist_samples.col(z);
 			}
@@ -449,10 +449,10 @@ void AnomalyDetection::train_model()
 			log_file << valid_edge_hist_samples << endl;
 
 			//			exit(0);
-			u32 n_gaussians = 3;
+			uword n_gaussians = 3;
 			gm_local_model(y, x).train_kmeans(edge_hist_samples, n_gaussians, 5, 0.9, false, false);
 
-			for (u32 z = 0; z < n_gaussians; ++z)
+			for (uword z = 0; z < n_gaussians; ++z)
 			{
 
 				//							cout << valid_edge_hist_samples << endl;
@@ -491,12 +491,12 @@ void AnomalyDetection::train_model()
 		}
 	}
 
-	u32 lmax = 0;
-	for (u32 y = 0; y < (1 + ymb); ++y)
+	uword lmax = 0;
+	for (uword y = 0; y < (1 + ymb); ++y)
 	{
-		for (u32 x = 0; x < (1 + xmb); ++x)
+		for (uword x = 0; x < (1 + xmb); ++x)
 		{
-			lmax = max(lmax, (u32) rep_textures(y, x).n_cols);
+			lmax = max(lmax, (uword) rep_textures(y, x).n_cols);
 
 		}
 	}
@@ -513,11 +513,11 @@ void AnomalyDetection::compute_subwindows_features(const cv::Mat &in_frame, umat
 
 	mat tmp_mtx(1, 1);
 	umat tmp_arma_frame(height, width);
-	u32 x = 0, y = 0;
+	uword x = 0, y = 0;
 	//copy frame into arma structure
-	for (u32 i = 0; i < height; i++)
+	for (uword i = 0; i < height; i++)
 	{
-		for (u32 j = 0; j < width; j++)
+		for (uword j = 0; j < width; j++)
 		{
 
 			tmp_arma_frame(i, j) = in_frame.at<arma::u8> (i, j) & 0x1;
@@ -525,9 +525,9 @@ void AnomalyDetection::compute_subwindows_features(const cv::Mat &in_frame, umat
 		}
 	}
 	//analyse region and take a call to classify it as idle/busy block
-	for (u32 i = 0; i <= height - N; i += ovlstep)
+	for (uword i = 0; i <= height - N; i += ovlstep)
 	{
-		for (u32 j = 0; j <= width - N; j += ovlstep)
+		for (uword j = 0; j <= width - N; j += ovlstep)
 		{
 			tmp_mtx = sum(sum(tmp_arma_frame.submat(i, j, (i + N - 1), (j + N - 1))));
 
@@ -541,16 +541,16 @@ void AnomalyDetection::compute_subwindows_features(const cv::Mat &in_frame, umat
 
 }
 
-void AnomalyDetection::compute_subwindows_edges(const cv::Mat &in_frame, const cv::Mat &in_bin_frame, const u32 &fidx)
+void AnomalyDetection::compute_subwindows_edges(const cv::Mat &in_frame, const cv::Mat &in_bin_frame, const uword &fidx)
 {
 
 	mat tmp_mtx(1, 1);
 	mat tmp_arma_frame = zeros<mat> (height, width);
-	u32 x = 0, y = 0;
+	uword x = 0, y = 0;
 	//copy frame into arma structure
-	for (u32 i = 0; i < height; i++)
+	for (uword i = 0; i < height; i++)
 	{
-		for (u32 j = 0; j < width; j++)
+		for (uword j = 0; j < width; j++)
 		{
 
 			tmp_arma_frame(i, j) = (double) in_frame.at<float> (i, j);
@@ -559,9 +559,9 @@ void AnomalyDetection::compute_subwindows_edges(const cv::Mat &in_frame, const c
 	}
 
 
-	for (u32 i = 0; i <= height - N; i += ovlstep)
+	for (uword i = 0; i <= height - N; i += ovlstep)
 	{
-		for (u32 j = 0; j <= width - N; j += ovlstep)
+		for (uword j = 0; j <= width - N; j += ovlstep)
 		{
 
 			tmp_mtx = sum(sum(tmp_arma_frame.submat(i, j, (i + N - 1), (j + N - 1))));
@@ -576,7 +576,7 @@ void AnomalyDetection::compute_subwindows_edges(const cv::Mat &in_frame, const c
 }
 
 //store the busy/idle counts into a matrix for easy computation
-void AnomalyDetection::extract_spatio_temporal_features(const u32 &fs_idx, const u32 &stage)
+void AnomalyDetection::extract_spatio_temporal_features(const uword &fs_idx, const uword &stage)
 {
 
 	string file;
@@ -585,9 +585,9 @@ void AnomalyDetection::extract_spatio_temporal_features(const u32 &fs_idx, const
 	file.assign("vec.txt");
 	out_file.open("output/mtx.txt", ios::app);
 
-	for (u32 x = 0; x < (1 + xmb); ++x)
+	for (uword x = 0; x < (1 + xmb); ++x)
 	{
-		for (u32 y = 0; y < (1 + ymb); ++y)
+		for (uword y = 0; y < (1 + ymb); ++y)
 		{
 
 		}
@@ -626,16 +626,16 @@ void AnomalyDetection::test(const cv::Mat &frame, const cv::Mat &grysc_frame)
 		collect_frames_for_testing(frame, grysc_frame);
 	}
 
-	u32 f_idx = testfrm_idx++;
+	uword f_idx = testfrm_idx++;
 	ad_image.zeros();
-	u32 mid_pt = (temporal_window) / 2;
+	uword mid_pt = (temporal_window) / 2;
 
-	for (u32 tw_idx = f_idx, z = 0; tw_idx < (f_idx + temporal_window); ++tw_idx, ++z)
+	for (uword tw_idx = f_idx, z = 0; tw_idx < (f_idx + temporal_window); ++tw_idx, ++z)
 	{
 		arma_frame = test_binary_masks[tw_idx];
-		for (u32 x = 0; x < (1 + xmb); ++x)
+		for (uword x = 0; x < (1 + xmb); ++x)
 		{
-			for (u32 y = 0; y < (1 + ymb); ++y)
+			for (uword y = 0; y < (1 + ymb); ++y)
 			{
 
 				//				tmprl_win_feature(y, x)(z) = arma_frame(y, x);
@@ -659,9 +659,9 @@ void AnomalyDetection::test(const cv::Mat &frame, const cv::Mat &grysc_frame)
 	}
 
 	Col<double> fv(1);
-	for (u32 x = 0; x < (1 + xmb); ++x)
+	for (uword x = 0; x < (1 + xmb); ++x)
 	{
-		for (u32 y = 0; y < (1 + ymb); ++y)
+		for (uword y = 0; y < (1 + ymb); ++y)
 		{
 			compute_feature_vector(tmprl_win_feature(y, x), fv);
 			test_feature(y, x) = fv;
@@ -676,10 +676,10 @@ void AnomalyDetection::test(const cv::Mat &frame, const cv::Mat &grysc_frame)
 
 	double probval;
 
-	for (u32 y = 0; y < (1 + ymb); ++y)
+	for (uword y = 0; y < (1 + ymb); ++y)
 	{
 
-		for (u32 x = 0; x < (1 + xmb); ++x)
+		for (uword x = 0; x < (1 + xmb); ++x)
 		{
 
 			bool ad_flag = false;
@@ -750,7 +750,7 @@ void AnomalyDetection::test(const cv::Mat &frame, const cv::Mat &grysc_frame)
 			}
 
 #if 0
-			u32 xp, yp;
+			uword xp, yp;
 			xp = 15;
 			yp = 8;
 
@@ -802,16 +802,16 @@ void AnomalyDetection::test(const cv::Mat &frame, const cv::Mat &grysc_frame)
 	size_feature.zeros();
 	tmp_x.zeros();
 	tmp_y.zeros();
-	u32 lcnt, size_t = 6, speed_t = 0.5;
+	uword lcnt, size_t = 6, speed_t = 0.5;
 
-	for (u32 y = 0; y < (1 + ymb); ++y)
+	for (uword y = 0; y < (1 + ymb); ++y)
 	{
-		for (u32 x = 0; x < (1 + xmb); ++x)
+		for (uword x = 0; x < (1 + xmb); ++x)
 		{
 
 			//size
 			lcnt = 0;
-			for (u32 i = 0; i < local_features(y, x).n_rows; ++i)
+			for (uword i = 0; i < local_features(y, x).n_rows; ++i)
 			{
 				features_file << local_features(y, x).row(i)(0) << " ";
 				if (local_features(y, x).row(i)(0) > size_t)
@@ -828,14 +828,14 @@ void AnomalyDetection::test(const cv::Mat &frame, const cv::Mat &grysc_frame)
 
 			features_file << endl;
 
-			for (u32 i = 0; i < local_features(y, x).n_rows; ++i)
+			for (uword i = 0; i < local_features(y, x).n_rows; ++i)
 			{
 				features_file << norm(tmprl_avgblk_mv_tr(y, x).col(i), 1) << " ";
 			}
 
 			//motion vectors
 			lcnt = 0;
-			for (u32 i = 0; i < tmprl_avgblk_mv_tr(y, x).n_cols; ++i)
+			for (uword i = 0; i < tmprl_avgblk_mv_tr(y, x).n_cols; ++i)
 			{ // L1 norm
 				//				mv_features_file << norm(tmprl_avgblk_mv_tr(y, x)(i), 1) << " ";
 				mv_features_file << tmprl_avgblk_mv_tr(y, x).col(i)(0) << " ";
@@ -856,7 +856,7 @@ void AnomalyDetection::test(const cv::Mat &frame, const cv::Mat &grysc_frame)
 			mv_features_file << endl;
 
 			lcnt = 0;
-			for (u32 i = 0; i < tmprl_avgblk_mv_tr(y, x).n_cols; ++i)
+			for (uword i = 0; i < tmprl_avgblk_mv_tr(y, x).n_cols; ++i)
 			{
 				mv_features_file << tmprl_avgblk_mv_tr(y, x).col(i)(1) << " ";
 
@@ -872,31 +872,31 @@ void AnomalyDetection::test(const cv::Mat &frame, const cv::Mat &grysc_frame)
 				tmp_y(y, x) /= lcnt;
 			}
 
-			for (u32 i = 0; i < spd_pdf(y, x).n_elem; ++i)
+			for (uword i = 0; i < spd_pdf(y, x).n_elem; ++i)
 			{
 				pdf_file << spd_pdf(y, x)(i) << " ";
 			}
 			//			exit(0);
 
 			//edge histogram
-			u32 xpick = 4;
-			u32 ypick = 9;
+			uword xpick = 4;
+			uword ypick = 9;
 
 			if (x == xpick && y == ypick)
-			for (u32 i = 0; i < tmprl_edge_hist_tr(y, x).n_cols; ++i)
+			for (uword i = 0; i < tmprl_edge_hist_tr(y, x).n_cols; ++i)
 			{
 				edge_pdf << trans(tmprl_edge_hist_tr(y, x).col(i)) << endl;
 
 			}
-			//			for (u32 i = 0; i < tmprl_edge_hist_tr(y, x).n_cols; ++i)
+			//			for (uword i = 0; i < tmprl_edge_hist_tr(y, x).n_cols; ++i)
 			//			{
 			//				edge_pdf << tmprl_edge_hist_tr(y, x).col(i)(1) << " ";
 			//			}
-			//			for (u32 i = 0; i < tmprl_edge_hist_tr(y, x).n_cols; ++i)
+			//			for (uword i = 0; i < tmprl_edge_hist_tr(y, x).n_cols; ++i)
 			//			{
 			//				edge_pdf << tmprl_edge_hist_tr(y, x).col(i)(2) << " ";
 			//			}
-			//			for (u32 i = 0; i < tmprl_edge_hist_tr(y, x).n_cols; ++i)
+			//			for (uword i = 0; i < tmprl_edge_hist_tr(y, x).n_cols; ++i)
 			//			{
 			//				edge_pdf << tmprl_edge_hist_tr(y, x).col(i)(3) << " ";
 			//			}
@@ -955,7 +955,7 @@ void AnomalyDetection::collect_frames_for_training(const cv::Mat &bin_frame, con
 	gabor_filter(grysc_frame);
 	//	edge_filter(grysc_frame);
 
-	for (u32 f = 0; f < gbr_prms.theta_arr.n_elem; ++f)
+	for (uword f = 0; f < gbr_prms.theta_arr.n_elem; ++f)
 	{
 		//		cv::imshow("mainWin2", edge_frames(f));
 		//		cv::waitKey(200);
@@ -964,9 +964,9 @@ void AnomalyDetection::collect_frames_for_training(const cv::Mat &bin_frame, con
 	}
 
 	double lacc;
-	for (u32 x = 0; x < (1 + xmb); ++x)
+	for (uword x = 0; x < (1 + xmb); ++x)
 	{
-		for (u32 y = 0; y < (1 + ymb); ++y)
+		for (uword y = 0; y < (1 + ymb); ++y)
 		{
 
 			fr_avgblk_mv_tr(y, x).push_back(cur_avgblk_mv(y, x));
@@ -991,7 +991,7 @@ void AnomalyDetection::collect_frames_for_training(const cv::Mat &bin_frame, con
 				fr_edge_hist_tr(y, x).push_back(cur_edge_hist(y, x));
 
 #if 0
-				u32 xp, yp;
+				uword xp, yp;
 				xp = 9;
 				yp = 5;
 				if (x == xp && y == yp)
@@ -1036,14 +1036,14 @@ void AnomalyDetection::collect_frames_for_testing(const cv::Mat &frame, const cv
 	gabor_filter(grysc_frame);
 	//	edge_filter(grysc_frame);
 
-	for (u32 f = 0; f < gbr_prms.theta_arr.n_elem; ++f)
+	for (uword f = 0; f < gbr_prms.theta_arr.n_elem; ++f)
 	{
 		compute_subwindows_edges(edge_frames(f), frame, f);
 	}
 
-	for (u32 x = 0; x < (1 + xmb); ++x)
+	for (uword x = 0; x < (1 + xmb); ++x)
 	{
-		for (u32 y = 0; y < (1 + ymb); ++y)
+		for (uword y = 0; y < (1 + ymb); ++y)
 		{
 
 			fr_avgblk_mv_tst(y, x).push_back(cur_avgblk_mv(y, x));
@@ -1065,12 +1065,12 @@ void AnomalyDetection::collect_frames_for_testing(const cv::Mat &frame, const cv
 	}
 
 #if 0
-	u32 x, y;
+	uword x, y;
 	x = 2;
 	y = 6;
 
-	u32 x1 = x * ovlstep;
-	u32 y1 = y * ovlstep;
+	uword x1 = x * ovlstep;
+	uword y1 = y * ovlstep;
 
 	cv::Mat blk_img = frame(cv::Rect(x1, y1, (N), (N)));
 
@@ -1170,7 +1170,7 @@ void AnomalyDetection::create_dct_table(int N1)
 
 }
 
-void AnomalyDetection::display_feature_value(u32 fidx)
+void AnomalyDetection::display_feature_value(uword fidx)
 {
 
 	cv::Size imsize(width, height);
@@ -1180,13 +1180,13 @@ void AnomalyDetection::display_feature_value(u32 fidx)
 	MBframe.set_size((1 + ymb), (1 + xmb));
 
 	Mat<double> tmp_mtx;
-	u32 x = 0, y = 0;
+	uword x = 0, y = 0;
 
 	double lacc, lmax, lconst;
 
-	for (u32 x = 0; x < (1 + xmb); ++x)
+	for (uword x = 0; x < (1 + xmb); ++x)
 	{
-		for (u32 y = 0; y < (1 + ymb); ++y)
+		for (uword y = 0; y < (1 + ymb); ++y)
 		{
 			MBframe(y, x) = test_feature(y, x)(0);
 		}
@@ -1209,9 +1209,9 @@ void AnomalyDetection::display_feature_value(u32 fidx)
 	//
 	MBframe.print("vals");
 
-	for (u32 i = 0; i <= height - N; i += ovlstep)
+	for (uword i = 0; i <= height - N; i += ovlstep)
 	{
-		for (u32 j = 0; j <= width - N; j += ovlstep)
+		for (uword j = 0; j <= width - N; j += ovlstep)
 		{
 			tmp_mtx = armaframe.submat(i, j, (i + N - 1), (j + N - 1));
 			tmp_mtx.fill(MBframe(y, x));
@@ -1225,9 +1225,9 @@ void AnomalyDetection::display_feature_value(u32 fidx)
 	//	armaframe.print("armafr");
 
 	/*writing the arma frame into opencv matrix*/
-	for (u32 i = 0; i < height; i++)
+	for (uword i = 0; i < height; i++)
 	{
-		for (u32 j = 0; j < width; j++)
+		for (uword j = 0; j < width; j++)
 		{
 			estimated_ad_frame.at<arma::u8> (i, j) = (u8) min(armaframe(i, j) * 1, (double) 255);
 		}
@@ -1250,13 +1250,13 @@ void AnomalyDetection::compute_feature_vector(const Col<double> &input_vector, C
 	vec filter_out = input_vector;
 	//		out_fv(0) = sum(filter_out);
 
-	u32 mid_pt = (filter_out.n_elem) / 2;
+	uword mid_pt = (filter_out.n_elem) / 2;
 	out_fv(0) = filter_out(mid_pt);
 
 	//	out_fv(1) = 0;
 
 	//	double lacc = 0;
-	//	for (u32 idx = 0; idx < filter_out.n_elem - 1; ++idx)
+	//	for (uword idx = 0; idx < filter_out.n_elem - 1; ++idx)
 	//	{
 	//		lacc += std::abs(filter_out(idx) - filter_out(idx + 1));
 	//	}
@@ -1282,13 +1282,13 @@ void AnomalyDetection::save_ad_model_params()
 	path.assign(rpath);
 	path.append("_size");
 
-	//	for (u32 y = 0; y < (1 + ymb); ++y)
+	//	for (uword y = 0; y < (1 + ymb); ++y)
 	//	{
 	//		numtostr(y, str);
 	//		tmp.assign("y");
 	//		tmp.append(str);
 	//
-	//		for (u32 x = 0; x < (1 + xmb); ++x)
+	//		for (uword x = 0; x < (1 + xmb); ++x)
 	//		{
 	//			tmp1.assign(path);
 	//			tmp1.append(tmp);
@@ -1305,13 +1305,13 @@ void AnomalyDetection::save_ad_model_params()
 	path.append("_edge");
 	tmprl_edge_hist_tr.save(path);
 
-	//	for (u32 y = 0; y < (1 + ymb); ++y)
+	//	for (uword y = 0; y < (1 + ymb); ++y)
 	//	{
 	//		numtostr(y, str);
 	//		tmp.assign("y");
 	//		tmp.append(str);
 	//
-	//		for (u32 x = 0; x < (1 + xmb); ++x)
+	//		for (uword x = 0; x < (1 + xmb); ++x)
 	//		{
 	//			tmp1.assign(path);
 	//			tmp1.append(tmp);
@@ -1335,13 +1335,13 @@ void AnomalyDetection::save_ad_model_params()
 	//	gm_local_model.save(path);
 
 
-	for (u32 y = 0; y < (1 + ymb); ++y)
+	for (uword y = 0; y < (1 + ymb); ++y)
 	{
 		numtostr(y, str);
 		tmp.assign("y");
 		tmp.append(str);
 
-		for (u32 x = 0; x < (1 + xmb); ++x)
+		for (uword x = 0; x < (1 + xmb); ++x)
 		{
 			tmp1.assign(path);
 			tmp1.append(tmp);
@@ -1380,13 +1380,13 @@ void AnomalyDetection::load_ad_model_params()
 	path.assign(rpath);
 	path.append("_size");
 
-	//	for (u32 y = 0; y < (1 + ymb); ++y)
+	//	for (uword y = 0; y < (1 + ymb); ++y)
 	//	{
 	//		numtostr(y, str);
 	//		tmp.assign("y");
 	//		tmp.append(str);
 	//
-	//		for (u32 x = 0; x < (1 + xmb); ++x)
+	//		for (uword x = 0; x < (1 + xmb); ++x)
 	//		{
 	//			tmp1.assign(path);
 	//			tmp1.append(tmp);
@@ -1407,13 +1407,13 @@ void AnomalyDetection::load_ad_model_params()
 	//	path.append("_gmm");
 	//	//	gm_local_model.load(path);
 	//
-	//	for (u32 y = 0; y < (1 + ymb); ++y)
+	//	for (uword y = 0; y < (1 + ymb); ++y)
 	//	{
 	//		numtostr(y, str);
 	//		tmp.assign("y");
 	//		tmp.append(str);
 	//
-	//		for (u32 x = 0; x < (1 + xmb); ++x)
+	//		for (uword x = 0; x < (1 + xmb); ++x)
 	//		{
 	//			tmp1.assign(path);
 	//			tmp1.append(tmp);
@@ -1431,13 +1431,13 @@ void AnomalyDetection::load_ad_model_params()
 
 	tmprl_avgblk_mv_tr.load(path);
 
-	//	for (u32 y = 0; y < (1 + ymb); ++y)
+	//	for (uword y = 0; y < (1 + ymb); ++y)
 	//	{
 	//		numtostr(y, str);
 	//		tmp.assign("y");
 	//		tmp.append(str);
 	//
-	//		for (u32 x = 0; x < (1 + xmb); ++x)
+	//		for (uword x = 0; x < (1 + xmb); ++x)
 	//		{
 	//			tmp1.assign(path);
 	//			tmp1.append(tmp);
@@ -1508,7 +1508,7 @@ void AnomalyDetection::gabor_filter(const cv::Mat &in_frame)
 	cv::Mat flt_img = cv::Mat::zeros(cv::Size(width, height), CV_32FC1);
 	in_frame.convertTo(flt_img, flt_img.type());
 
-	for (u32 t = 0; t < gbr_prms.theta_arr.n_elem; ++t)
+	for (uword t = 0; t < gbr_prms.theta_arr.n_elem; ++t)
 	{
 
 
@@ -1531,7 +1531,7 @@ void AnomalyDetection::gabor_kernel_initialisation()
 	/*******************************************create mask****************************/
 
 	cv::Mat mask = cv::Mat::ones(cv::Size(gbr_prms.kernel_size, gbr_prms.kernel_size), CV_32FC1);
-	u32 c_coord = ceil(gbr_prms.kernel_size / 2);
+	uword c_coord = ceil(gbr_prms.kernel_size / 2);
 	float dist, size_thr = 4;
 
 	for (x = 0; x < gbr_prms.kernel_size; x++)
@@ -1559,7 +1559,7 @@ void AnomalyDetection::gabor_kernel_initialisation()
 	float k = datum::pi; // 2.5
 	float phi = exp(-(k * k) / 2);
 
-	for (u32 t = 0; t < gbr_prms.theta_arr.n_elem; ++t)
+	for (uword t = 0; t < gbr_prms.theta_arr.n_elem; ++t)
 	{
 
 		float theta = CV_PI * gbr_prms.theta_arr(t) / 180;
@@ -1618,7 +1618,7 @@ void AnomalyDetection::edge_filter(const cv::Mat &in_frame)
 	//	cv::Mat flag =  cv::Mat::zeros(cv::Size(width, height), CV_8UC1);
 	//	cv::Mat dst =  cv::Mat::zeros(cv::Size(width, height), CV_32FC1);
 
-	for (u32 t = 0; t < edgefilt_prms.n_kernels; ++t)
+	for (uword t = 0; t < edgefilt_prms.n_kernels; ++t)
 	{
 		cv::filter2D(in_frame, tmp_img, CV_32F, edgefilt_prms.kernel_mtx(t));
 
@@ -1721,8 +1721,8 @@ void AnomalyDetection::edge_filter_initialisation()
 //double anomaly_detection::test_for_texture(const mog_diag<double> &model, const Col<double> &query_vec)
 //{
 //
-//	u32 size = model.n_gaus;
-//	u32 lmatch = 0;
+//	uword size = model.n_gaus;
+//	uword lmatch = 0;
 //
 //	Col<double> dist(size);
 //	Col<double> dist1(size);
@@ -1735,7 +1735,7 @@ void AnomalyDetection::edge_filter_initialisation()
 //		return (1.0);
 //	}
 //
-//	for (u32 i = 0; i < size; ++i)
+//	for (uword i = 0; i < size; ++i)
 //	{
 //
 //		if (accu(model.means(i)) > 0)
@@ -1756,8 +1756,8 @@ void AnomalyDetection::edge_filter_initialisation()
 double AnomalyDetection::test_for_texture(const mat &model, const Col<double> &query_vec)
 {
 
-	u32 size = model.n_cols;
-	u32 lmatch = 0;
+	uword size = model.n_cols;
+	uword lmatch = 0;
 
 	Col<double> dist(size);
 
@@ -1768,7 +1768,7 @@ double AnomalyDetection::test_for_texture(const mat &model, const Col<double> &q
 		return (1.0);
 	}
 
-	for (u32 i = 0; i < size; ++i)
+	for (uword i = 0; i < size; ++i)
 	{
 		if (accu(model.col(i)) > 0)
 		{
@@ -1833,9 +1833,9 @@ double AnomalyDetection::test_for_speed(const field<Col<double> > &data,
 	features_file.open("output/speed_features.txt", ios::out|ios::app);
 #endif
 
-	u32 size = data.n_elem;
+	uword size = data.n_elem;
 	Col<double> dist(size);
-	u32 n_samples = 0, lmatch = 0;
+	uword n_samples = 0, lmatch = 0;
 	double prob;
 	vec tmp(2);
 	out_avg_dist = 0;
@@ -1846,7 +1846,7 @@ double AnomalyDetection::test_for_speed(const field<Col<double> > &data,
 		return (0.9);
 	}
 
-	for (u32 i = 0; i < size; ++i)
+	for (uword i = 0; i < size; ++i)
 	{
 
 		if (sum(data(i)) > 0)
@@ -1888,8 +1888,8 @@ double AnomalyDetection::test_for_size(const field<Col<double> > &data,
 		const Col<double> &query_vec, const double &bw, double &out_avg_dist)
 {
 
-	u32 size = data.n_elem;
-	u32 n_samples = 0, lmatch = 0;
+	uword size = data.n_elem;
+	uword n_samples = 0, lmatch = 0;
 	Col<double> dist(size);
 	double prob, tmp;
 	out_avg_dist = 0;
@@ -1900,7 +1900,7 @@ double AnomalyDetection::test_for_size(const field<Col<double> > &data,
 		return (0.9);
 	}
 
-	for (u32 i = 0; i < size; ++i)
+	for (uword i = 0; i < size; ++i)
 	{
 
 		if (data(i)(0) > ofset)
@@ -1927,11 +1927,11 @@ double AnomalyDetection::test_for_size(const field<Col<double> > &data,
 }
 #endif
 
-double AnomalyDetection::test_for_speed(const Col<double> &query_vec, const u32 &x, const u32 &y)
+double AnomalyDetection::test_for_speed(const Col<double> &query_vec, const uword &x, const uword &y)
 {
 
 	double dist = norm(query_vec, 1);
-	u32 i;
+	uword i;
 	s32 match_idx = 0;
 	double probval = 1;
 	if (dist > 0.5)
@@ -1983,11 +1983,11 @@ double AnomalyDetection::test_for_speed(const Col<double> &query_vec, const u32 
 
 }
 
-double AnomalyDetection::test_for_size(const Col<double> &query_vec, const u32 &x, const u32 &y)
+double AnomalyDetection::test_for_size(const Col<double> &query_vec, const uword &x, const uword &y)
 {
 
 	double dist = query_vec(0);
-	u32 i;
+	uword i;
 	s32 match_idx = 0;
 	double probval = 1;
 	if (dist > 5)
@@ -2045,9 +2045,9 @@ void AnomalyDetection::estimate_motion(const cv::Mat &bin_frame, const cv::Mat &
 	cv::Point2f pt;
 
 	//copy only active pixel locations
-	for (u32 i = 0; i < height; i += 1)
+	for (uword i = 0; i < height; i += 1)
 	{
-		for (u32 j = 0; j < width; j += 1)
+		for (uword j = 0; j < width; j += 1)
 		{
 
 			if ((bin_frame.at<arma::u8> (i, j) & 0x1) == 1)
@@ -2095,10 +2095,10 @@ void AnomalyDetection::estimate_motion(const cv::Mat &bin_frame, const cv::Mat &
 	//	cv::namedWindow("LK Demo", 1);
 	//	float diff;
 
-	u32 k = 0, z = 0;
-	for (u32 i = 0; i < height; i += 1)
+	uword k = 0, z = 0;
+	for (uword i = 0; i < height; i += 1)
 	{
-		for (u32 j = 0; j < width; j += 1)
+		for (uword j = 0; j < width; j += 1)
 		{
 
 			if ((bin_frame.at<arma::u8> (i, j) & 0x1) == 1)
@@ -2131,12 +2131,12 @@ void AnomalyDetection::estimate_motion(const cv::Mat &bin_frame, const cv::Mat &
 
 		}
 	}
-	u32 x = 0, y = 0;
+	uword x = 0, y = 0;
 	mat tmp_mtx(1, 1);
 	//analyse region and take a call to classify it as idle/busy block
-	for (u32 i = 0; i <= height - N; i += ovlstep)
+	for (uword i = 0; i <= height - N; i += ovlstep)
 	{
-		for (u32 j = 0; j <= width - N; j += ovlstep)
+		for (uword j = 0; j <= width - N; j += ovlstep)
 		{
 			cur_avgblk_mv(y, x).zeros();
 
@@ -2178,15 +2178,15 @@ void AnomalyDetection::estimate_motion(const cv::Mat &bin_frame, const cv::Mat &
 	//	exit(0);
 	//}
 
-	//	for (u32 x = 0; x < (1 + xmb); ++x)
+	//	for (uword x = 0; x < (1 + xmb); ++x)
 	//	{
-	//		for (u32 y = 0; y < (1 + ymb); ++y)
+	//		for (uword y = 0; y < (1 + ymb); ++y)
 	//		{
 	//			if (norm(cur_avgblk_mv(y, x), 1) > 50)
 	//			{
 	//				cout << norm(cur_avgblk_mv(y, x), 1) << endl;
-	//				u32 i = x * N;
-	//				u32 j = y * N;
+	//				uword i = x * N;
+	//				uword j = y * N;
 	//
 	//			}
 	//		}
@@ -2206,7 +2206,7 @@ void AnomalyDetection::estimate_motion(const cv::Mat &bin_frame, const cv::Mat &
 
 }
 
-double AnomalyDetection::find_8connected_neighbours(const u32 &x, const u32 &y, const umat &blk_occ_mtx)
+double AnomalyDetection::find_8connected_neighbours(const uword &x, const uword &y, const umat &blk_occ_mtx)
 {
 
 	int tr, lc, rc, br;
@@ -2250,7 +2250,7 @@ double AnomalyDetection::find_8connected_neighbours(const u32 &x, const u32 &y, 
 
 }
 
-void AnomalyDetection::kernel_density_estimate(const mat &training_samples, vec &blk_mv_pdf, const u32 &idx)
+void AnomalyDetection::kernel_density_estimate(const mat &training_samples, vec &blk_mv_pdf, const uword &idx)
 {
 #if 1
 	double kd_bw[2] =
@@ -2264,14 +2264,14 @@ void AnomalyDetection::kernel_density_estimate(const mat &training_samples, vec 
 	mat data = training_samples * kd_bw_inv;
 	eval_pts = eval_pts * kd_bw_inv;
 
-	u32 n_eval_pts = eval_pts.n_rows;
-	u32 n_data_pts = data.n_rows;
+	uword n_eval_pts = eval_pts.n_rows;
+	uword n_data_pts = data.n_rows;
 
 	mat W(n_eval_pts, n_data_pts);
 
 	double norm_const = (1 / sqrt(2 * datum::pi));
 
-	for (u32 i = 0; i < n_eval_pts; ++i)
+	for (uword i = 0; i < n_eval_pts; ++i)
 	{
 		mat z = data - repmat(eval_pts.row(i), n_data_pts, 1);
 
@@ -2308,7 +2308,7 @@ void AnomalyDetection::kernel_density_estimate(const mat &training_samples, vec 
 
 
 	mat eval_pts = linspace<mat> (kd_min[idx], kd_max[idx], n_kd_eval_pts[idx] + 1);
-	u32 n_eval_pts = eval_pts.n_rows;
+	uword n_eval_pts = eval_pts.n_rows;
 
 	vec c1 = eval_pts.submat(0, 0, n_eval_pts - 2, 0);
 	vec c2 = eval_pts.submat(1, 0, n_eval_pts - 1, 0);
@@ -2322,7 +2322,7 @@ void AnomalyDetection::kernel_density_estimate(const mat &training_samples, vec 
 
 	umat chist = zeros<umat> (n_eval_pts + 1, training_samples.n_cols);
 
-	for (u32 i = 0; i < (n_eval_pts - 1); ++i)
+	for (uword i = 0; i < (n_eval_pts - 1); ++i)
 	{
 		chist.row(i + 1) = sum(training_samples <= cutoff(i));
 	}
@@ -2333,7 +2333,7 @@ void AnomalyDetection::kernel_density_estimate(const mat &training_samples, vec 
 	mat hist = conv_to<mat>::from(chist);
 	hist.print_trans("hist");
 	rowvec acc(1);
-	for (u32 i = 0; i < n_eval_pts; ++i)
+	for (uword i = 0; i < n_eval_pts; ++i)
 	{
 		acc = hist.row(i + 1) - hist.row(i);
 		blk_mv_pdf(i) = sum(acc);
@@ -2359,10 +2359,10 @@ void AnomalyDetection::online_texture_quantisation(const mat &texture_mat, mat &
 	double rr;
 	vector<running_stat_vec<double> > vq_elem;
 	running_stat_vec<double> curr_elem;
-	vector<u32> wt_arr;
-	u32 wt = 1;
+	vector<uword> wt_arr;
+	uword wt = 1;
 	//	cout << "txt: in " << endl;
-	u32 st_no = 0;
+	uword st_no = 0;
 	while (st_no < texture_mat.n_cols)
 	{
 		if (accu(texture_mat.col(st_no)) > 0)
@@ -2385,7 +2385,7 @@ void AnomalyDetection::online_texture_quantisation(const mat &texture_mat, mat &
 
 	st_no++;
 
-	for (u32 i = st_no; i < texture_mat.n_cols; ++i)
+	for (uword i = st_no; i < texture_mat.n_cols; ++i)
 	{
 		addblkflg = true;
 		updateflg = false;
@@ -2393,7 +2393,7 @@ void AnomalyDetection::online_texture_quantisation(const mat &texture_mat, mat &
 		if (accu(texture_mat.col(i)) > 0)
 		{
 
-			for (u32 k = 0; k < vq_elem.size(); ++k)
+			for (uword k = 0; k < vq_elem.size(); ++k)
 			{
 
 				rr = measure_correlation_coefficient(vq_elem[k].mean(), texture_mat.col(i));
@@ -2432,7 +2432,7 @@ void AnomalyDetection::online_texture_quantisation(const mat &texture_mat, mat &
 	}
 
 	rep_textures.set_size(gbr_prms.theta_arr.n_elem, vq_elem.size());
-	for (u32 i = 0; i < vq_elem.size(); ++i)
+	for (uword i = 0; i < vq_elem.size(); ++i)
 	{
 		rep_textures.col(i) = vq_elem[i].mean();
 		//		cout << trans(vq_elem[i].mean()) << " ";
