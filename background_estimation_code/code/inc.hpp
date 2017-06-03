@@ -25,10 +25,8 @@ using namespace std;
 #include <algorithm>
 #include <string>
 #include <vector>
-#include "armadillo"
+#include <armadillo>
 using namespace arma;
-#include "cvaux.h"
-#include "highgui.h"
+#include <opencv2/opencv.hpp>
 
 #endif /* INC_H_ */
-

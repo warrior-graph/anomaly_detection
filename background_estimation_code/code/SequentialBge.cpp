@@ -1,19 +1,19 @@
 // Copyright (C) 2009 - 2012 NICTA
-// 
+//
 // Authors:
 // - Vikas Reddy (vikas.reddy at ieee dot org)
 //               (rvikas2333 at gmail dot com)
-// 
+//
 // Please cite the following journal article when using this source code:
-// 
+//
 //  V. Reddy, C. Sanderson,  B.C. Lovell.
 //  A Low-Complexity Algorithm for Static Background Estimation from Cluttered Image Sequences in Surveillance Contexts.
 //  Eurasip Journal on Image and Video Processing, 2011.
-//   
+//
 //  http://dx.doi.org/10.1155/2011/164956
-// 
+//
 // ---
-// 
+//
 // This file is provided without any warranty of
 // fitness for any purpose. You can redistribute
 // this file and/or modify it under the terms of
@@ -24,7 +24,6 @@
 
 #include "inc.hpp"
 #include "SequentialBge.hpp"
-#include <cxtypes.h>
 const int bg_est::N_MASKS = 1;
 
 bg_est::bg_est(const cv::Mat &frame, const bge_params& in_bge_params)
@@ -619,7 +618,7 @@ void bg_est::create_dct_table(int N)
 
 			scale_fac_i = (m == 0) ? sqrt(1.0 / double(N)) : sqrt(2.0
 					/ double(N));
-			DCT_coeffs(k++) = scale_fac_i * std::cos(double((math::pi() * m)
+			DCT_coeffs(k++) = scale_fac_i * std::cos(double((datum::pi * m)
 					/ (2 * N) * (2 * n + 1)));
 		}
 	}
@@ -690,7 +689,7 @@ void bg_est::bg_estimation_at_blocks()
 							cost, interpval, x, y);
 
 					vec costvec = sum(cost, 1);
-					uvec best_id = sort_index(costvec, 1);
+					uvec best_id = sort_index(costvec, "descend");
 
 					if (best_blk_idx < 0)
 					{
@@ -730,7 +729,7 @@ void bg_est::bg_estimation_at_blocks()
 								= unfilled_block_estimate_from_1_neighbour(
 										cost, interpval, x, y);
 						vec costvec = sum(cost, 1);
-						uvec best_id = sort_index(costvec, 1);
+						uvec best_id = sort_index(costvec, "descend");
 						if (best_blk_idx < 0)
 						{
 							continue;
@@ -1467,7 +1466,7 @@ void bg_est::apply_ICM()
 										cost, interpval, x, y);
 
 						vec costvec = sum(cost, 1);
-						uvec best_id = sort_index(costvec, 1);
+						uvec best_id = sort_index(costvec, "descend");
 
 						if (best_blk_idx < 0)
 						{
@@ -1480,7 +1479,7 @@ void bg_est::apply_ICM()
 									= unfilled_block_estimate_from_1_neighbour(
 											cost, interpval, x, y);
 							vec costvec = sum(cost, 1);
-							uvec best_id = sort_index(costvec, 1);
+							uvec best_id = sort_index(costvec, "descend");
 							if (best_blk_idx < 0)
 							{
 								cout << " shd not have come here" << endl;
