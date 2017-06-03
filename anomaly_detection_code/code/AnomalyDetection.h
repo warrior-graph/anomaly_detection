@@ -65,7 +65,7 @@ public:
 	}
 };
 
-typedef struct debug_mb
+struct debug_mb
 {
 	cv::Point coords;
 	vec fv;

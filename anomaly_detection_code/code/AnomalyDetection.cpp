@@ -787,11 +787,8 @@ void AnomalyDetection::test(const cv::Mat &frame, const cv::Mat &grysc_frame)
 					loc.push_back(tmp);
 
 				}
-
 			}
-
 		}
-
 
 	}
 
@@ -1167,7 +1164,7 @@ void AnomalyDetection::create_dct_table(int N1)
 		{
 
 			scale_fac_i = (m == 0) ? sqrt(1.0 / double(N1)) : sqrt(2.0 / double(N1));
-			DCT_coeffs(k++) = scale_fac_i * std::cos(double((math::pi() * m) / (2 * N1) * (2 * n + 1)));
+			DCT_coeffs(k++) = scale_fac_i * std::cos(double((datum::pi * m) / (2 * N1) * (2 * n + 1)));
 		}
 	}
 
@@ -1556,10 +1553,10 @@ void AnomalyDetection::gabor_kernel_initialisation()
 	/******************************************* create mask****************************/
 
 	float x_p, y_p, x_2, y_2;
-	float w0 = (2 * math::pi()) / gbr_prms.lambda;
+	float w0 = (2 * datum::pi) / gbr_prms.lambda;
 
 	//frequency bandwidth of 1.5 octave
-	float k = math::pi(); // 2.5
+	float k = datum::pi; // 2.5
 	float phi = exp(-(k * k) / 2);
 
 	for (u32 t = 0; t < gbr_prms.theta_arr.n_elem; ++t)
@@ -1570,7 +1567,7 @@ void AnomalyDetection::gabor_kernel_initialisation()
 		//				cout << "theta :" << gbr_prms.theta_arr(t) << endl;
 
 		s32 ofset = gbr_prms.kernel_size / 2;
-		float norm_factor = (w0 / (sqrt(2 * math::pi()) * k));
+		float norm_factor = (w0 / (sqrt(2 * datum::pi) * k));
 		float exp_val, cosine_part;
 
 		for (x = 0; x < gbr_prms.kernel_size; x++)
@@ -2272,7 +2269,7 @@ void AnomalyDetection::kernel_density_estimate(const mat &training_samples, vec 
 
 	mat W(n_eval_pts, n_data_pts);
 
-	double norm_const = (1 / sqrt(2 * math::pi()));
+	double norm_const = (1 / sqrt(2 * datum::pi));
 
 	for (u32 i = 0; i < n_eval_pts; ++i)
 	{
