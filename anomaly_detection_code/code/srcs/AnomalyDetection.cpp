@@ -760,9 +760,9 @@ void AnomalyDetection::test(const cv::Mat &frame, const cv::Mat &grysc_frame)
 
 				string lpath = "output/tmp/img_";
 				char str[512];
-				numtostr(test_frame_cnt, str);
+				//numtostr(test_frame_cnt, str);
 
-				lpath.append(str);
+				lpath.append(to_string(test_frame_cnt));
 				lpath.append(".png");
 				cv::Mat tmpfr = grysc_frame.clone();
 				trace_block(tmpfr, xp, yp);
@@ -1337,17 +1337,17 @@ void AnomalyDetection::save_ad_model_params()
 
 	for (uword y = 0; y < (1 + ymb); ++y)
 	{
-		numtostr(y, str);
+		//numtostr(y, str);
 		tmp.assign("y");
-		tmp.append(str);
+		tmp.append(to_string(y));
 
 		for (uword x = 0; x < (1 + xmb); ++x)
 		{
 			tmp1.assign(path);
 			tmp1.append(tmp);
-			numtostr(x, str);
+			//numtostr(x, str);
 			tmp1.append("x");
-			tmp1.append(str);
+			tmp1.append(to_string(x));
 //			gm_local_model(y, x).save(tmp1);
 			tmp1.clear();
 

@@ -234,7 +234,7 @@ int main(int argc, char **argv)
 			// downsize 'first_img' depending in DS_RATIO and pad to make it multiple of 'N'
 			file_sys2.downscale_frame_and_pad_if_necessary();
 
-			uword millsec;
+			//uword millsec;
 			//loop the test images to detect anomaly in the frames
 			for (uword f = 0; f < file_sys1.sequence_len; f++)
 			{
@@ -246,7 +246,7 @@ int main(int argc, char **argv)
 				//anomaly detection testing
 				ad_object.test(file_sys1.padded_input_img, file_sys2.padded_input_img);
 				file_sys1.n_secs += timer.toc();
-				millsec = 2;
+				//millsec = 2;
 
 				//				cv::Mat ad_mask	= compute_ad_mask(ad_object, cur_param_vec);
 #if 0
@@ -289,14 +289,14 @@ int main(int argc, char **argv)
 					}
 					else if (file_sys1.in_data_format == type_video)
 					{
-						char lbuff[64];
+						//char lbuff[64];
 						string vfile;
 						vfile.assign(file_sys1.curr_filename);
 						string vid_file = vfile.substr(0, vfile.length() - 4);
 						write_path.append(vid_file);
 						write_path.append("_");
-						numtostr(f, lbuff);
-						write_path.append(lbuff);
+						// numtostr(f, lbuff);
+						write_path.append(to_string(f));
 						write_path.append(".png");
 
 					}
@@ -614,7 +614,7 @@ void load_configurations(mat &param_vec)
 cv::Mat filtered_detection(vector<cv::Mat> &display_buffer, AnomalyDetection &obj, const cube & ad_flags, const uword &f)
 {
 
-	vector<cv::Mat>::iterator p = display_buffer.begin();
+	//vector<cv::Mat>::iterator p = display_buffer.begin();
 	ofstream filt_file;
 	filt_file.open("../../wrk_space_output1/filt_disp.txt", ios::app);
 
