@@ -963,7 +963,7 @@ void AnomalyDetection::collect_frames_for_training(const cv::Mat &bin_frame, con
 
 	}
 
-	double lacc;
+	//double lacc;
 	for (uword x = 0; x < (1 + xmb); ++x)
 	{
 		for (uword y = 0; y < (1 + ymb); ++y)
@@ -1182,7 +1182,7 @@ void AnomalyDetection::display_feature_value(uword fidx)
 	Mat<double> tmp_mtx;
 	uword x = 0, y = 0;
 
-	double lacc, lmax, lconst;
+	double lacc;
 
 	for (uword x = 0; x < (1 + xmb); ++x)
 	{
@@ -1277,7 +1277,7 @@ void AnomalyDetection::save_ad_model_params()
 	string rpath = "output/ad_model_prms/ad_model";
 	string path;
 	string tmp, tmp1;
-	char str[128];
+	//char str[128];
 
 	path.assign(rpath);
 	path.append("_size");
@@ -1375,7 +1375,7 @@ void AnomalyDetection::load_ad_model_params()
 	string rpath = "output/ad_model_prms/ad_model";
 	string path;
 	string tmp, tmp1;
-	char str[128];
+	//char str[128];
 
 	path.assign(rpath);
 	path.append("_size");
@@ -2095,7 +2095,7 @@ void AnomalyDetection::estimate_motion(const cv::Mat &bin_frame, const cv::Mat &
 	//	cv::namedWindow("LK Demo", 1);
 	//	float diff;
 
-	uword k = 0, z = 0;
+	uword z = 0;
 	for (uword i = 0; i < height; i += 1)
 	{
 		for (uword j = 0; j < width; j += 1)

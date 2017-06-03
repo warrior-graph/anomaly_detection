@@ -47,9 +47,9 @@ string outpath = "output/ad_masks/ped1/";
 
 int main(int argc, char **argv)
 {
-
+	ios_base::sync_with_stdio(false);
 	cout << "using Armadillo " << arma_version::major << "." << arma_version::minor << "." << arma_version::patch
-			<< endl;
+			<< '\n';
 
 	cube ad_flags;
 	wall_clock timer;
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 
 		const rowvec& cur_param_vec = param_vec.row(loop_id);
 
-		cout << cur_param_vec << endl;
+		cout << cur_param_vec << '\n';
 
 		if (first_time_entry == true)
 		{
@@ -104,7 +104,7 @@ int main(int argc, char **argv)
 			mbx++;
 			mby++;
 
-			cout << mbx << " " << mby << endl;
+			cout << mbx << " " << mby << '\n';
 
 
 			ad_flags.set_size(mby, mbx, 200);
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
 
 			file_sys1.param_file >> file_sys1.tr_mask_path >> tr_img_path >> file_sys1.tst_mask_path
 					>> tst_img_path >> seqname;
-			cout << "Sequence number " << seqno << ": " << seqname << endl;
+			cout << "Sequence number " << seqno << ": " << seqname << '\n';
 
 #ifdef WRITE_OUTPUT
 
@@ -173,7 +173,7 @@ int main(int argc, char **argv)
 #endif
 
 			//************************************************************************
-			cout << "ad train path: " << file_sys1.tr_mask_path << endl;
+			cout << "ad train path: " << file_sys1.tr_mask_path << '\n';
 			file_sys1.path.assign(file_sys1.tr_mask_path);
 			//load files from the folder pointed by member variable 'path'
 			//			config_obj.load_files_from_folder(bg_tr_filenames);
@@ -218,7 +218,7 @@ int main(int argc, char **argv)
 
 			}
 
-			cout << "test path: " << file_sys1.tst_mask_path << endl;
+			cout << "test path: " << file_sys1.tst_mask_path << '\n';
 
 			file_sys1.path.assign(file_sys1.tst_mask_path);
 			//load files from the folder pointed by member variable 'path'
@@ -260,7 +260,7 @@ int main(int argc, char **argv)
 
 					ad_flags(ad_object.loc[i].coords.y, ad_object.loc[i].coords.x, f) = 1;
 
-					//					cout << f << endl;
+					//					cout << f << '\n';
 					ad_object.trace_block(file_sys2.input_img_mtx, ad_object.loc[i].coords.x,
 							ad_object.loc[i].coords.y);
 
@@ -303,10 +303,10 @@ int main(int argc, char **argv)
 
 					if(disp_buf.channels() != 3)
 					{
-						cout << " error here " << endl;
+						cout << " error here " << '\n';
 						exit(0);
 					}
-					//													cout << write_path.c_str() << endl;
+					//													cout << write_path.c_str() << '\n';
 					cv::imwrite(write_path.c_str(), disp_buf);
 				}
 #endif
@@ -322,7 +322,7 @@ int main(int argc, char **argv)
 			}
 
 			// output the dimensions of the image, frame rate info etc.
-			cout << "Seq no: " << seqno << endl;
+			cout << "Seq no: " << seqno << '\n';
 			file_sys1.output_statistics();
 
 			ad_post_processing(res_mtx, ad_flags, cur_param_vec(3), seqno);
@@ -389,7 +389,7 @@ cv::Mat compute_ad_mask(const AnomalyDetection &obj, const rowvec& in_params)
 	}
 	else
 	{
-		cout << " compute ad mask: invalid paramter" << endl;
+		cout << " compute ad mask: invalid paramter" << '\n';
 		exit(-1);
 	}
 
@@ -442,7 +442,7 @@ void ad_post_processing(Mat<uword> &resmtx, cube &ad_flags, const double &twindo
 	ofstream filt_file;
 	filt_file.open("../../wrk_space_output1/filt_gt.txt", ios::out);
 
-	cout << ad_flags.n_rows << " " << ad_flags.n_cols << " " << ad_flags.n_slices << endl;
+	cout << ad_flags.n_rows << " " << ad_flags.n_cols << " " << ad_flags.n_slices << '\n';
 
 	cube ad_flags_raw;
 	ad_flags_raw = ad_flags;
@@ -471,7 +471,7 @@ void ad_post_processing(Mat<uword> &resmtx, cube &ad_flags, const double &twindo
 	uword n_seq = resmtx.n_rows;
 	Col<uword> n_frms(n_seq);
 
-	cout << n_seq << endl;
+	cout << n_seq << '\n';
 
 	if (resmtx.n_rows == 36)
 	{
@@ -485,7 +485,7 @@ void ad_post_processing(Mat<uword> &resmtx, cube &ad_flags, const double &twindo
 	}
 	else
 	{
-		cout << " invalid no of sequences: ad_post_processing" << endl;
+		cout << " invalid no of sequences: ad_post_processing" << '\n';
 		exit(0);
 	}
 
@@ -532,7 +532,7 @@ void load_configurations(mat &param_vec)
 	if ((prms_srt.n_elem != prms_end.n_elem) || (prms_srt.n_elem != prms_stp.n_elem) || (prms_stp.n_elem
 			!= prms_end.n_elem))
 	{
-		cout << "load_configurations:incorrect number of parameters" << endl;
+		cout << "load_configurations:incorrect number of parameters" << '\n';
 		exit(-1);
 	}
 
@@ -544,10 +544,10 @@ void load_configurations(mat &param_vec)
 
 		tmp = (uword) (prms_end(i) - prms_srt(i) + prms_stp(i)) / (prms_stp(i));
 
-		cout << tmp << endl;
+		cout << tmp << '\n';
 		if (tmp < 0)
 		{
-			cout << "load_configurations:-ve range value" << endl;
+			cout << "load_configurations:-ve range value" << '\n';
 			exit(-1);
 		}
 		total *= tmp;
