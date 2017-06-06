@@ -1,19 +1,19 @@
 // Copyright (C) 2009 - 2012 NICTA
-// 
+//
 // Authors:
 // - Vikas Reddy (vikas.reddy at ieee dot org)
 //               (rvikas2333 at gmail dot com)
-// 
+//
 // Please cite the following journal article when using this source code:
-// 
+//
 //  V. Reddy, C. Sanderson,  B.C. Lovell.
 //  A Low-Complexity Algorithm for Static Background Estimation from Cluttered Image Sequences in Surveillance Contexts.
 //  Eurasip Journal on Image and Video Processing, 2011.
-//   
+//
 //  http://dx.doi.org/10.1155/2011/164956
-// 
+//
 // ---
-// 
+//
 // This file is provided without any warranty of
 // fitness for any purpose. You can redistribute
 // this file and/or modify it under the terms of

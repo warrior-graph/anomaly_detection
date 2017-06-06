@@ -1,5 +1,5 @@
 // Copyright (C) 2009 - 2012 NICTA
-// 
+//
 // Authors:
 // - Conrad Sanderson (conradsand at ieee dot org)
 //
@@ -14,50 +14,50 @@
 template<typename eT>
 class mog_diag_em_ml
   {
-  
+
   public:
-  
+
   ~mog_diag_em_ml();
-  
+
   mog_diag_em_ml
     (
     const mog_diag<eT>&     in_model,
     const field< Col<eT> >& in_X,
     const u32  in_n_iter       = 1,
-    const eT   in_var_floor    = Math<eT>::eps(),
-    const eT   in_weight_floor = Math<eT>::eps(),
+    const eT   in_var_floor    = datum::eps,
+    const eT   in_weight_floor = datum::eps,
     const bool in_verbose      = false
     );
 
-  
+
   void run(mog_diag<eT>& out_model);
-  
-  
-  
+
+
+
   private:
-  
+
   const field< Col<eT> >& X;
-  
+
   const u32 n_dim;
   const u32 n_gaus;
   const u32 n_iter;
   const u32 n_threads;
-  
+
   const eT  var_floor;
   const eT  weight_floor;
-  
+
   const bool verbose;
-  
+
   field< Col<eT> > means;
   field< Col<eT> > covs;
   Col<eT>          weights;
-  
+
   Col<eT> log_det_etc;
   Col<eT> log_weights;
 
   field< field< Col<eT> > > parallel_acc_means;
   field< field< Col<eT> > > parallel_acc_covs;
-  
+
   field< Col<eT> > parallel_gaus_log_lhoods;
   field< Col<eT> > parallel_gaus_lhoods;
   field< Col<eT> > parallel_acc_norm_lhoods;
@@ -65,8 +65,8 @@ class mog_diag_em_ml
   field< Col<u32> > boundaries;
 
   eT log_limit;
-  
-  
+
+
   //
   //
   inline void iterate();

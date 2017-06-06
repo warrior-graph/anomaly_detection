@@ -22,8 +22,8 @@
 // of the License or (at your option) any later version.
 // (see http://www.opensource.org/licenses for more info)
 
-#include "inc.hpp"
-#include "SequentialBge.hpp"
+#include "../headers/inc.hpp"
+#include "../headers/SequentialBge.hpp"
 const int bg_est::N_MASKS = 1;
 
 bg_est::bg_est(const cv::Mat &frame, const bge_params& in_bge_params)

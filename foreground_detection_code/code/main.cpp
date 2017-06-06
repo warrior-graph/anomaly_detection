@@ -1,12 +1,12 @@
-// 
+//
 // Please cite the following journal article when using this source code:
-//   
+//
 //  V. Reddy, C. Sanderson, B.C. Lovell.
 //  Improved Foreground Detection via Block-based Classifier Cascade with Probabilistic Decision Integration.
 //  IEEE Transactions on Circuits and Systems for Video Technology, Vol. 23, No. 1, pp. 83-93, 2013.
-//   
+//
 //  DOI: 10.1109/TCSVT.2012.2203199
-//   
+//
 // You can obtain a copy of this article via:
 // http://dx.doi.org/10.1109/TCSVT.2012.2203199
 
@@ -37,7 +37,6 @@
 //writes the foreground masks to the below location if WRITEMASK is defined in main.hpp
 const string mask_save_path = "output/";
 
-void numtostr(int num, char *str);
 rowvec initialiseParameters();
 
 
@@ -67,12 +66,12 @@ int main(int argc, char **argv)
 	if(argc < 2)
         {
         	cout << "input sequence path is not specified; please set the input path" << endl;
-		exit(-1);    
+		exit(-1);
 	}
         else if(argc < 3)
 	{
 		cout << "input sequence name is not specified; setting it to 'test'" << endl;
-		seqname = "test";  
+		seqname = "test";
 	}
         else
 	{
@@ -102,7 +101,7 @@ int main(int argc, char **argv)
 		cout << "Input Sequence path " << config_obj.path << endl;
 
 
-		u32 training_frames = 200;
+		uword training_frames = 200;
 
 #ifdef WRITEMASK
 
@@ -130,7 +129,7 @@ int main(int argc, char **argv)
 
 
 		// check if the total frames in the sequence is less than specified number of training frames
-		training_frames = min((u32) config_obj.sequence_len,training_frames) - 1;
+		training_frames = min((uword) config_obj.sequence_len,training_frames) - 1;
 
 		// downsize 'first_img' depending in DS_RATIO and pad to make it multiple of 'N'
 		config_obj.downscale_frame_and_pad_if_necessary();
@@ -146,7 +145,7 @@ int main(int argc, char **argv)
 				cascadedBgsParams);
 
 
-		for (u32 i = 0; i < training_frames + 1; i++)
+		for (uword i = 0; i < training_frames + 1; i++)
 		{
 			//read frame into 'input_mtx' and then store into 'padded_input_img'
 			config_obj.get_input_frame(result, i);
@@ -165,7 +164,7 @@ int main(int argc, char **argv)
 
 
 
-		for (u32 i = 0; i < config_obj.sequence_len; i++)
+		for (uword i = 0; i < config_obj.sequence_len; i++)
 		{
 			//read frame into 'input_mtx' and then store into 'padded_input_img'
 			config_obj.get_input_frame(result, i);
@@ -202,11 +201,6 @@ int main(int argc, char **argv)
 		// output the dimensions of the image, frame rate info etc.
 		config_obj.output_statistics();
 
-	
-
-
-
-
 	return 0;
 }
 
@@ -229,40 +223,3 @@ rowvec initialiseParameters()
 
 	return tmp;
 }
-
-
-/*Function to convert an integer to string*/
-void numtostr(int num, char *str)
-{
-	int i = 0;
-	int temp = num;
-	char arr[20];
-
-	if (temp == 0)
-	{
-		str[i] = 0x30;
-		str[i + 1] = '\0';
-		return;
-	}
-
-	while (temp)
-	{
-		int q = temp % 10;
-		temp = temp / 10;
-		arr[i] = (unsigned char) ((q) + 0x30);
-		i++;
-	}
-
-	arr[i] = '\0';
-	int len = strlen(arr);
-	i = 0;
-
-	for (int var = len - 1; var >= 0; var--)
-	{
-		str[i] = arr[var];
-		i++;
-	}
-	str[i] = '\0';
-}
-
-

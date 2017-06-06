@@ -12,7 +12,7 @@
 // of the License or (at your option) any later version.
 // (see http://www.opensource.org/licenses for more info)
 
-#include "SequentialBgeParams.hpp"
+#include "../headers/SequentialBgeParams.hpp"
 
 bge_params::bge_params(const s32 &in_len, const bg_est_param_values &in_Tvals) :
 	len(in_len), N(in_Tvals.N), ovlstep(in_Tvals.Ovlstep), pixel_diff(

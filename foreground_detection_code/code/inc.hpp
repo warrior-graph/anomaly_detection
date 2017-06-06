@@ -25,12 +25,8 @@
 #include <string>
 #include <vector>
 
-#include "cvaux.h"
-#include "highgui.h"
-#include "cxcore.h"
-#include "cv.h"
-
-#include "armadillo"
+#include <opencv2/opencv.hpp>
+#include <armadillo>
 
 using namespace std;
 using namespace arma;
@@ -38,4 +34,3 @@ using namespace arma;
 
 
 #endif /* INC_H_ */
-

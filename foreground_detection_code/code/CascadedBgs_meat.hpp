@@ -851,7 +851,7 @@ template<typename eT> void CascadedBgs<eT>::choose_dominant_gaussian(
 			for (x = 0; x <= xmb; x++)
 			{
 
-				ucolvec indices = sort_index(gm_model_initial(y, x).weights, 1);
+				ucolvec indices = sort_index(gm_model_initial(y, x).weights, "descend");
 				for (u32 i = 0; i < cascadedBgsParams->n_gaus_final; ++i)
 				{
 
@@ -880,7 +880,7 @@ template<typename eT> void CascadedBgs<eT>::choose_dominant_gaussian(
 			for (x = 0; x <= xmb; x++)
 			{
 
-				ucolvec indices = sort_index(gm_model_initial(y, x).weights, 1);
+				ucolvec indices = sort_index(gm_model_initial(y, x).weights, "descend");
 				for (u32 i = 0; i < cascadedBgsParams->n_gaus_final; ++i)
 				{
 
@@ -914,7 +914,7 @@ template<typename eT> void CascadedBgs<eT>::create_dct_table(int N)
 		{
 
 			scale_fac_i = (m == 0) ? sqrt(1.0 / eT(N)) : sqrt(2.0 / eT(N));
-			DCT_coeffs(k++) = scale_fac_i * std::cos(eT((math::pi() * m) / (2
+			DCT_coeffs(k++) = scale_fac_i * std::cos(eT((datum::pi * m) / (2
 					* N) * (2 * n + 1)));
 		}
 	}

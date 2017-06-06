@@ -1,19 +1,19 @@
 // Copyright (C) 2009 - 2012 NICTA
-// 
+//
 // Authors:
 // - Vikas Reddy (vikas.reddy at ieee dot org)
 //               (rvikas2333 at gmail dot com)
-// 
+//
 // Please cite the following journal article when using this source code:
-// 
+//
 //  V. Reddy, C. Sanderson,  B.C. Lovell.
 //  A Low-Complexity Algorithm for Static Background Estimation from Cluttered Image Sequences in Surveillance Contexts.
 //  Eurasip Journal on Image and Video Processing, 2011.
-//   
+//
 //  http://dx.doi.org/10.1155/2011/164956
-// 
+//
 // ---
-// 
+//
 // This file is provided without any warranty of
 // fitness for any purpose. You can redistribute
 // this file and/or modify it under the terms of
@@ -22,8 +22,8 @@
 // of the License or (at your option) any later version.
 // (see http://www.opensource.org/licenses for more info)
 
-#include"inc.hpp"
-#include"SequentialBge.hpp"
+#include"../headers/inc.hpp"
+#include"../headers/SequentialBge.hpp"
 
 void numtostr(int num, char *str);
 
@@ -47,14 +47,14 @@ int main(int argc, char **argv)
 	//define constant
 	bg_est_param_values T_vals;
 
-        /*Parameters that to tune if required*/ 
+        /*Parameters that to tune if required*/
 	T_vals.N = 8;
 	T_vals.Ovlstep = T_vals.N;
-	/*for setting the MAD threshold*/        
+	/*for setting the MAD threshold*/
 	T_vals.Pixel_Diff = 5;
-	/*for setting the correlation coefficient threshold*/        
+	/*for setting the correlation coefficient threshold*/
 	T_vals.Corr_Coef = 0.8;
-	/*weight for spatial term*/        
+	/*weight for spatial term*/
 	T_vals.Eta = 3;
 	T_vals.MinFrames = 100;
 	T_vals.Iterations= 1;
