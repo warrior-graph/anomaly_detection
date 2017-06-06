@@ -33,18 +33,44 @@
 #include "input_preprocessor.hpp"
 #include "main.hpp"
 
+#include <dirent.h>
+
+using namespace cv;
 
 //writes the foreground masks to the below location if WRITEMASK is defined in main.hpp
 const string mask_save_path = "output/";
 
 rowvec initialiseParameters();
 
+	void create_images(const char* video)
+	{
+		system("exec mkdir images");
+		VideoCapture cap(video);
+		cv::Mat frame;
+		int count = 1;
+		string name;
+		while(cap.isOpened())
+		{
+			name = "";
+			cap >> frame;
+			if(count > 200)
+				break;
+			if(count < 10)
+				name += "00";
+			else if (count < 99)
+				name += "0";
+			name += to_string(count);
+			imwrite(("images/" + name + ".tif").c_str(), frame);
+			count++;
+		}
+	}
 
 int main(int argc, char **argv)
 {
-
+	create_images("teste.avi");
 	cout << "using Armadillo " << arma_version::major << "."
 			<< arma_version::minor << "." << arma_version::patch << endl;
+
 
 	wall_clock timer;
 
