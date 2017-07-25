@@ -38,11 +38,12 @@ static void onMouse( int event, int x, int y, int /*flags*/, void* /*param*/ )
 
 int main( int argc, char** argv )
 {
+    //ios_base::sync_with_stdio(false); cin.tie(nullptr); cout.tie(nullptr);
     VideoCapture cap;
     TermCriteria termcrit(TermCriteria::COUNT|TermCriteria::EPS,20,0.03);
     Size subPixWinSize(10,10), winSize(31,31);
 
-    const int MAX_COUNT = 500;
+    const int MAX_COUNT = 200;
     bool needToInit = false;
     bool nightMode = false;
     bool alwaysOn = false;
@@ -66,18 +67,29 @@ int main( int argc, char** argv )
         cout << "Could not initialize capturing...\n";
         return 0;
     }
+    cap.open("/home/marques/Workspace/kanade/outputfile.mp4");
 
     namedWindow( "LK Demo", 1 );
     setMouseCallback( "LK Demo", onMouse, 0 );
 
     Mat gray, prevGray, image, frame;
     vector<Point2f> points[2];
+    //vector<float> dists;
+    //double mean, deviation;
+    Scalar mean, deviation;
+    Mat dists;
+    double Th1, Th2, distAux;
     //int fps = cap.get(CV_CAP_PROP_FPS) + .5;
     for(;;)
     {
         cap >> frame;
         if( frame.empty() )
-            break;
+        {
+            cap.open("/home/marques/Workspace/kanade/outputfile.mp4");
+            needToInit = true;
+            continue;
+            //break;
+        }
 
         frame.copyTo(image);
         cvtColor(image, gray, COLOR_BGR2GRAY);
@@ -87,7 +99,6 @@ int main( int argc, char** argv )
 
         if( needToInit )
         {
-            // automatic initialization
             goodFeaturesToTrack(gray, points[1], MAX_COUNT, 0.01, 10, Mat(), 3, 0, 0.04);
             cornerSubPix(gray, points[1], subPixWinSize, Size(-1,-1), termcrit);
             addRemovePt = false;
@@ -122,11 +133,42 @@ int main( int argc, char** argv )
                     continue;
 
                 points[1][k++] = points[1][i];
-                circle( image, points[1][i], 3, Scalar(0,255,0), -1, 8);
+                circle( image, points[1][i], 2, Scalar(0,255,0), -1, 8);
                 arrowedLine(image, Point((int)points[0][i].x, (int)points[0][i].y),
                                    Point((int)points[1][i].x, (int)points[1][i].y), Scalar(255, 100, 255), 1.2, CV_AA, 0, 0.6);
+                dists.push_back(norm(points[0][i] - points[1][i]));
+
             }
             points[1].resize(k);
+
+            if(points[1].size() < MAX_COUNT / 2)
+            {
+                needToInit = true;
+                continue;
+            }
+
+            meanStdDev(dists, mean, deviation);
+            Th1 = mean[0] + deviation[0];
+            Th2 = mean[0] - deviation[1];
+            //waitKey(50);
+            for(i = 0; i < dists.size[0]; ++i)
+            {
+                distAux = dists.at<double>(i);
+                //cout << distAux << '\n';
+                //if(distAux < 0. or fabs(distAux) < 10) continue;
+                if ((distAux > Th1))
+                {
+                     circle( image, points[1][i], 2, Scalar(0,0,255), 3, 8);
+                     //arrowedLine(image, Point((int)points[0][i].x, (int)points[0][i].y),
+                                        //Point((int)points[1][i].x, (int)points[1][i].y), Scalar(255, 0, 0), 1.2, CV_AA, 0, 0.6);
+                }
+            }
+           // cout << dists.size[0] << '\n';
+
+            //cout << dists.at<double>(1) << ' ' << deviation[0] << ' ' << mean[0] << endl;
+            //cout << "dist size = " << dists.size() << endl;
+
+            dists.~Mat();
         }
 
         if( addRemovePt && points[1].size() < (size_t)MAX_COUNT )
@@ -137,6 +179,10 @@ int main( int argc, char** argv )
             points[1].push_back(tmp[0]);
             addRemovePt = false;
         }
+        putText(image, "Threshold 1 = " + to_string(Th1), Point(10, 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0), 1);
+        line(image, Point(10, 40), Point(10 + Th1 , 40), Scalar(0, 255, 0), 2);
+        putText(image, "Threshold 2 = " + to_string(Th2), Point(10, 70), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 255), 1);
+        line(image, Point(10, 90), Point(10 + Th2 , 90), Scalar(0, 255, 255), 2);
 
         needToInit = false;
         imshow("LK Demo", image);
@@ -165,6 +211,7 @@ int main( int argc, char** argv )
 
         std::swap(points[1], points[0]);
         cv::swap(prevGray, gray);
+        //waitKey(100);
     }
 
     return 0;
