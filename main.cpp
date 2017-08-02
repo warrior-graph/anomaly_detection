@@ -1,13 +1,15 @@
 #include <bits/stdc++.h>
 #define bug(x) cout << #x << " = " << (x) << '\n'
+#include <eigen3/Eigen/Dense>
 #include <opencv2/opencv.hpp>
 #include <opencv2/tracking.hpp>
-#include <eigen3/Eigen/Dense>
+#include <opencv2/core/eigen.hpp>
 
 
 using namespace cv;
 using namespace std;
 using namespace Eigen;
+using Eigen::MatrixXd;
 
 using tensor = vector<Mat>;
 using kernel = tensor;
@@ -45,6 +47,22 @@ tensor get_features(const Mat &frame, const Rect2i &roi)
     return features;
 }
 
+double diss(const Mat &c1, const Mat &c2)
+{
+    Mat eigen_vals;
+    MatrixXd _c1, _c2;
+    GeneralizedEigenSolver<MatrixXd> ges;
+    cv2eigen(c1,_c1);
+    cv2eigen(c2, _c2);
+    ges.compute(_c1, _c2);
+    //eigen2cv(ges.eigenvalues()::Scalar(), eigen_vals);
+    bug(ges.eigenvalues().row(0));
+    eigen2cv(ges.eigenvalues()., eigen_vals);
+    //bug(eigen_vals);
+    return 1;
+
+}
+
 
 Mat get_cov(const tensor &roi_tensor)
 {
@@ -66,7 +84,7 @@ Mat get_cov(const tensor &roi_tensor)
             mulTransposed(aux, aux2, true, mean, CV_64F);
             cov += aux2 / (m * n);
         }
-    bug(cov);
+    //bug(cov);
     return cov;
 }
 
@@ -91,6 +109,7 @@ int main(int argc, char** argv)
     cap >> frame;
     */
     tensor feat;
+    vector<Mat> covs;
     for(;;)
     {
         cap >> frame;
@@ -105,7 +124,11 @@ int main(int argc, char** argv)
                 imshow("Feature" + to_string(i), feat[i]);*/
             rectangle(frame, roi, Scalar(0, 255, 0), 0.5);
             circle(frame, Point2i(x, y), 1.5, Scalar(255, 0, 0), 2);
-            get_cov(feat);
+            covs.push_back(get_cov(feat));
+            if(covs.size() == 2)
+            {
+                diss(covs[0], covs[1]);
+            }
         }
         imshow("Tracking", frame);
         if(waitKey(30) == 27) break;
