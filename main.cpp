@@ -29,19 +29,19 @@ Rect2i cut_image(const Mat &frame)
 }
 tensor get_features(const Mat &frame, const Rect2i &roi)
 {
-    Mat img = frame(roi), greyImg, dx, dy, d2x, d2y;
+    Mat img = frame(roi), greyImg, d[4], aux(img.rows, img.cols, CV_64FC2), taux[3];
     tensor features;
-    split(img, features);
-    cvtColor(img, greyImg, CV_BGR2GRAY);
-    Sobel(greyImg, dx, CV_32FC1, 1, 0, 1);
-    Sobel(greyImg, dy, CV_32F, 0, 1, 1);
-    Sobel(greyImg, d2x, CV_32F, 2, 0, 1);
-    Sobel(greyImg, d2y, CV_32F, 0, 2, 1);
+    split(img, taux);
 
-    features.push_back(dx);
-    features.push_back(dy);
-    features.push_back(d2x);
-    features.push_back(d2y);
+    cvtColor(img, greyImg, CV_BGR2GRAY);
+    Sobel(greyImg, d[0], CV_64F, 1, 0, 1);
+    Sobel(greyImg, d[1], CV_64F, 0, 1, 1);
+    Sobel(greyImg, d[2], CV_64F, 2, 0, 1);
+    Sobel(greyImg, d[3], CV_64F, 0, 2, 1);
+    for(int i = 0; i < 3; ++i)
+        taux[i].convertTo(aux, CV_64Fc), features.push_back(aux);
+    for(int i = 0; i < 4; ++i)
+        d[i].convertTo(aux, CV_64F), features.push_back(aux);
     return features;
 }
 
@@ -49,20 +49,28 @@ Mat get_cov(const tensor &roi_tensor)
 {
 
     int m = roi_tensor[0].rows, n = roi_tensor[0].cols, sz = roi_tensor.size();
-    Mat cov = Mat::zeros(sz, sz, CV_64F), mean = Mat::zeros(1, sz, CV_64F), aux = Mat::zeros(1, sz, CV_64F);
-
-    for(int i = 0; i < roi_tensor.size(); ++i)
+    Mat cov = Mat::zeros(sz, sz, CV_64F),
+        mean = Mat::zeros(1, sz, CV_64F),
+        aux = Mat::zeros(1, sz, CV_64F),
+        aux2 = Mat::zeros(1, sz, CV_64F);
+    bug(m), bug(n);
+    for(uint i = 0; i < roi_tensor.size(); ++i)
         mean.at<double>(0, i) = sum(roi_tensor[i])[0] / (m * n);
     bug(mean);
-    for(int i = 0;  i < m; ++i)
-        for(int j = 0; j < n; ++j)
+    for(int i = 0;  i < n; ++i)
+        for(int j = 0; j < m; ++j)
         {
             for(int k = 0; k < sz; ++k)
-                aux.at<double>(0, k) = roi_tensor[k].at<double>(i, j);
-            aux = (aux - mean);
-            cov += (aux.t()) * aux;
+                aux.at<double>(0, k) = (roi_tensor[k]).at<double>(i, j);
+            bug(aux), bug(mean);
+            mulTransposed(aux, aux2, true, mean, CV_64F);
+            cov += aux2;
+            //bug(aux);
+
         }
+
     bug(cov);
+
     return cov;
 }
 
@@ -88,15 +96,18 @@ int main(int argc, char** argv)
     for(;;)
     {
         cap >> frame;
-        if(waitKey(1) == 't')
+        if(waitKey(10) == 't')
         {
             roi = selectROI("First", frame, false, false);
             x = roi.x + roi.width / 2 + 1, y = roi.y + roi.height / 2 + 1;
             feat = get_features(frame, roi);
-            for(auto i: feat) bug(i);
 
             for(size_t i = 0; i < feat.size(); ++i)
+            {
+                //Mat aux = feat[i];
+                //resize(aux, aux, Size(300));
                 imshow("Feature" + to_string(i), feat[i]);
+            }
             rectangle(frame, roi, Scalar(0, 255, 0), 0.5);
             circle(frame, Point2i(x, y), 1.5, Scalar(255, 0, 0), 2);
             get_cov(feat);
