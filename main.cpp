@@ -1,41 +1,16 @@
 #include <bits/stdc++.h>
 #define bug(x) cout << #x << " = " << (x) << '\n'
-#include <eigen3/Eigen/Dense>
 #include <opencv2/opencv.hpp>
 #include <opencv2/tracking.hpp>
-#include <opencv2/core/eigen.hpp>
 
+#include <new_eigen.hpp>
 
 using namespace cv;
 using namespace std;
-using namespace Eigen;
-using Eigen::MatrixXd;
+using namespace new_eigen;
 
 using tensor = vector<Mat>;
 using kernel = tensor;
-
-
-template <typename T>
-vector<double> get_eigenvals(const T &t)
-{
-    vector<double> ans;
-    ostringstream os;
-    string aux, aux1;
-    os << t;
-    aux = os.str();
-    bool flag = false;
-    for(const char &c : aux)
-    {
-        if(c == '(')
-        {
-            aux1.clear(), flag = true;
-            continue;
-        }
-        if(c == ',') flag = false, ans.push_back(stod(aux1));
-        if(flag) aux1 += c;
-    }
-    return ans;
-}
 
 Rect2i cut_image(const Mat &frame)
 {
@@ -70,29 +45,6 @@ tensor get_features(const Mat &frame, const Rect2i &roi)
     return features;
 }
 
-double diss(const Mat &c1, const Mat &c2)
-{
-    stringstream ss;
-    ostringstream os;
-    string s;
-    double sum = 0;
-    Mat eigen_vals;
-    MatrixXd _c1, _c2;
-    GeneralizedEigenSolver<MatrixXd> ges;
-    cv2eigen(c1,_c1);
-    cv2eigen(c2, _c2);
-    ges.compute(_c1, _c2);
-    //eigen2cv(ges.eigenvalues()::Scalar(), eigen_vals);
-    vector<double> eigen = get_eigenvals(ges.eigenvalues().transpose());
-
-    bug(s);
-    for(double i: eigen) bug(i), sum+= log(i)*log(i);
-
-    bug(sqrt(sum));
-    return 1;
-
-}
-
 
 Mat get_cov(const tensor &roi_tensor)
 {
@@ -114,11 +66,8 @@ Mat get_cov(const tensor &roi_tensor)
             mulTransposed(aux, aux2, true, mean, CV_64F);
             cov += aux2 / (m * n);
         }
-    //bug(cov);
     return cov;
 }
-
-
 
 int main(int argc, char** argv)
 {
@@ -128,40 +77,87 @@ int main(int argc, char** argv)
         cap = VideoCapture(0);
     else
         cap = VideoCapture(argv[1]);
+    cap = VideoCapture ("/home/marques/Downloads/vot2014/"+ string(argv[1]) +"/00000%3d.jpg");
     if(!cap.isOpened())
         return -1;
 
     Mat frame;
-    int x, y;
-    Rect2i roi;
+    int w_frame = 240, h_frame = 120;
+    Rect2i roi, r_track;
     /*if(argc < 2)
         for(int i = 0; i < 20; ++i) cap >> frame;
     cap >> frame;
     */
-    tensor feat;
-    vector<Mat> covs;
+    tensor feat, track_feat, search_feat;
+    vector<Mat> covs, frame_covs;
+    Mat model, covalks, modelupdated = Mat::zeros(7, 7, CV_64F);
+
+    char c;
+    bool init = false, clean = false;
     for(;;)
     {
         cap >> frame;
-        if(waitKey(10) == 't')
+        resize(frame, frame, Size(w_frame, h_frame));
+        if(init)
         {
             roi = selectROI("First", frame, false, false);
-            x = roi.x + roi.width / 2 + 1, y = roi.y + roi.height / 2 + 1;
-            feat = get_features(frame, roi);
-            //for(auto &f: feat) bug(f);
 
-            /*for(size_t i = 0; i < feat.size(); ++i)
-                imshow("Feature" + to_string(i), feat[i]);*/
-            rectangle(frame, roi, Scalar(0, 255, 0), 0.5);
-            circle(frame, Point2i(x, y), 1.5, Scalar(255, 0, 0), 2);
+            feat = get_features(frame, Rect2i(0, 0, frame.cols, frame.rows));
+            track_feat = get_features(frame, roi);
+            //rectangle(frame, roi, Scalar(0, 255, 0), 1);
+            //circle(frame, Point2i(x, y), 1.5, Scalar(255, 0, 0), 2);
             covs.push_back(get_cov(feat));
-            if(covs.size() == 2)
-            {
-                diss(covs[0], covs[1]);
-            }
+            covs.push_back(get_cov(track_feat));
+            init = false;
+            continue;
         }
+        if(clean) covs.clear(), feat.clear(), clean = false, cout << "tudo limpo\n";
+
+        if(!feat.empty())
+        {
+            // w_frame - roi.width
+            // h_frame - roi.heightteclado lindinh101010
+            double dist = 1 << 30, aux;
+            for(uint i = 0; i < w_frame - roi.width; i += 15)
+                for(uint j = 0; j < h_frame - roi.height; j += 15)
+                {
+                    search_feat = get_features(frame, Rect2i(i, j, roi.width, roi.height));
+                    aux = new_eigen::diss(covalks = get_cov(search_feat), covs[1]);
+                    if(aux < dist)
+                        dist = aux, r_track = Rect2i(i, j, roi.width, roi.height), model = covalks ;
+                    //cout << i << ' ' << j << '\n';
+                }
+            if(dist == (1 << 30)) {bug("mmorri");break;};
+            rectangle(frame, r_track, Scalar(0, 0, 200), 2);
+            frame_covs.push_back(model);
+            if(frame_covs.size() == 10)
+            {
+                for(const auto &m: frame_covs)
+                    modelupdated += m;
+                modelupdated = modelupdated * 0.1;
+                //bug(modelupdated);
+                covs[1] = modelupdated;
+                modelupdated = Mat::zeros(7, 7, CV_64F);
+                frame_covs.clear();
+            }
+
+        }
+
         imshow("Tracking", frame);
-        if(waitKey(30) == 27) break;
+        //if(waitKey(30) == 27) break;
+        c = (char) waitKey(10);
+        if(c == 27) break;
+
+        switch (c)
+        {
+        case 't':
+            init = true;
+            break;
+         case 'c':
+            clean = true;
+        default:
+            break;
+        }
     }
     return 0;
 }

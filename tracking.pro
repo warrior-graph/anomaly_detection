@@ -6,4 +6,8 @@ CONFIG += link_pkgconfig
 
 LIBS += -I /usr/include/eigen3/
 PKGCONFIG += opencv
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    new_eigen.cpp
+
+HEADERS += \
+    new_eigen.hpp
