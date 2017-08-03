@@ -14,6 +14,29 @@ using Eigen::MatrixXd;
 using tensor = vector<Mat>;
 using kernel = tensor;
 
+
+template <typename T>
+vector<double> get_eigenvals(const T &t)
+{
+    vector<double> ans;
+    ostringstream os;
+    string aux, aux1;
+    os << t;
+    aux = os.str();
+    bool flag = false;
+    for(const char &c : aux)
+    {
+        if(c == '(')
+        {
+            aux1.clear(), flag = true;
+            continue;
+        }
+        if(c == ',') flag = false, ans.push_back(stod(aux1));
+        if(flag) aux1 += c;
+    }
+    return ans;
+}
+
 Rect2i cut_image(const Mat &frame)
 {
     Mat _frame;
@@ -49,6 +72,10 @@ tensor get_features(const Mat &frame, const Rect2i &roi)
 
 double diss(const Mat &c1, const Mat &c2)
 {
+    stringstream ss;
+    ostringstream os;
+    string s;
+    double sum = 0;
     Mat eigen_vals;
     MatrixXd _c1, _c2;
     GeneralizedEigenSolver<MatrixXd> ges;
@@ -56,9 +83,12 @@ double diss(const Mat &c1, const Mat &c2)
     cv2eigen(c2, _c2);
     ges.compute(_c1, _c2);
     //eigen2cv(ges.eigenvalues()::Scalar(), eigen_vals);
-    bug(ges.eigenvalues().row(0));
-    eigen2cv(ges.eigenvalues()., eigen_vals);
-    //bug(eigen_vals);
+    vector<double> eigen = get_eigenvals(ges.eigenvalues().transpose());
+
+    bug(s);
+    for(double i: eigen) bug(i), sum+= log(i)*log(i);
+
+    bug(sqrt(sum));
     return 1;
 
 }
